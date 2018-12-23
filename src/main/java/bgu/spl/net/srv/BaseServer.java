@@ -2,6 +2,7 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.MessageEncoderDecoder;
 import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.api.bidi.BidiMessagingProtocol;
 import bgu.spl.net.api.bidi.BidiMessagingProtocolImpl;
 import bgu.spl.net.api.bidi.Connections;
 import bgu.spl.net.api.bidi.ConnectionsImpl;
@@ -15,7 +16,7 @@ import java.util.function.Supplier;
 public abstract class BaseServer<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<adad<T>> protocolFactory;
+    private final Supplier<BidiMessagingProtocolImpl<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
     private Connections connections;
@@ -37,6 +38,7 @@ public abstract class BaseServer<T> implements Server<T> {
 
         try (ServerSocket serverSock = new ServerSocket(port)) {
 			System.out.println("Server started");
+            BidiMessagingProtocolImpl protocol=  protocolFactory.get();
 
             this.sock = serverSock; //just to be able to close
 
@@ -47,8 +49,9 @@ public abstract class BaseServer<T> implements Server<T> {
                 ConnectionHandlerImpl<T> handler = new ConnectionHandlerImpl<>(
                         clientSock,
                         encdecFactory.get(),
-                        protocolFactory.get());
+                        protocol);
                 int connectionId = connections.add(handler);
+                protocol.start(connectionId, connections);
                 execute(handler);
             }
         } catch (IOException ex) {

@@ -173,13 +173,13 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
             }
             case "9": {
                 byte[]type_byte=shortToBytes((short) 9); //NOTIFICATION
-                return Notification(split,message,type_byte);
+                return Notification(split,type_byte);
             }
         }
         return null;
     }
 
-    private byte[] Notification(String[]split,String line, byte[] type_byte) {
+    private byte[] Notification(String[]split, byte[] type_byte) {
 
         byte[]pm_post=(split[1]).getBytes();//TODO CHECK CHAR
         byte[]posting_user=(split[2]+"\0").getBytes();
@@ -188,13 +188,11 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
              s=s.concat(split[i]+" ");
         }
         byte[]content=(s+"\0").getBytes();
-
         byte[]opcode_char=DefaultConvert(type_byte,pm_post);
         byte[]opcode_char_postuser=DefaultConvert(opcode_char,posting_user);
         byte[]fin=DefaultConvert(opcode_char_postuser,content);
         return fin;
     }
-
 
     private void pushByte(byte nextByte) {
         if (len >= bytes.length) {

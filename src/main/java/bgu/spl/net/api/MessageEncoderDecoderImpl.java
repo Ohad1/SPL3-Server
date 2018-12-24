@@ -12,18 +12,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     private HashMap<String,Short> types_codeMap;
 
     public MessageEncoderDecoderImpl(byte[] bytes, int len) {
-        this.types_codeMap=new HashMap<>();
-        types_codeMap.put("REGISTER",(short)1);
-        types_codeMap.put("LOGIN",(short)2);
-        types_codeMap.put("LOGOUT",(short)3);
-        types_codeMap.put("FOLLOW",(short)4);
-        types_codeMap.put("POST",(short)5);
-        types_codeMap.put("PM",(short)6);
-        types_codeMap.put("USERLIST",(short)7);
-        types_codeMap.put("STAT",(short)8);
-        types_codeMap.put("NOTIFICATION",(short)9);
-        types_codeMap.put("ACK",(short)10);
-        types_codeMap.put("ERROR",(short)11);
+
     }
 
 
@@ -31,77 +20,104 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         return  null;
     }
 
+
     public byte[] encode(String message) {
-        String[] split=new String[1024];
+        String[] split=new String[message.length()];
         String type=split[0];
         switch (type) {
-            case "ACK":
+            case "10": //ACK
             {
-
-              switch (split[1]) {
-
+                byte[]type_byte=shortToBytes((short) 10); //ACK
+                byte[]opcode_request_byte=shortToBytes(Short.parseShort(split[1]));
+                switch (split[1]) {
 
                   case "4"://follow
                   {
-                      return FollowRegister(split);
+                      return FollowRegisterUserList(split,type_byte,opcode_request_byte);
                   }
                   case "7": //userlist
                   {
-                      return UserList(split);
+                      return FollowRegisterUserList(split,type_byte,opcode_request_byte);
                   }
                   case "8": {
-                      return StatRegister(split);
+                      return StatRegister(split,type_byte,opcode_request_byte);
                   }
                   default:
-                      return DefaultConvert(split);
+                      return DefaultConvert(type_byte,opcode_request_byte);
               }
             }
-            case "ERROR":
+            case "11": //ERROR
             {
-                System.out.println("Statement 2 ");
-                break;
+                byte[]type_byte=shortToBytes((short) 11); //ERROR
+                byte[]opcode_request_byte=shortToBytes(Short.parseShort(split[1]));
+               return DefaultConvert(type_byte,opcode_request_byte);
             }
-            default:
-                System.out.println("You entered wrong value");
         }
-        return new byte[5];
+        return null;
     }
+
     public byte[] shortToBytes(short num)
     {
         byte[] bytesArr = new byte[2];
         bytesArr[0] = (byte)((num >> 8) & 0xFF);
         bytesArr[1] = (byte)(num & 0xFF);
         return bytesArr;
+
     }
 
-    private byte[] DefaultConvert(String[] split) {
-        String type=split[0];
-        Short opcode=types_codeMap.get(split[0]);
-        byte[]opcode_byte=shortToBytes(opcode);
-        byte[]type_opcode=(type + "\n").getBytes();
-        int length=type_opcode.length+opcode_byte.length;
-        byte[] fin= new byte[length];
-
-        for(int i=0;i<type_opcode.length;i++){
-            fin[i]=type_opcode[i];
+    private byte[] DefaultConvert(byte[]type_byte, byte[] opcode_request_byte) {
+        byte[] fin = new byte[type_byte.length + opcode_request_byte.length];
+        System.arraycopy(type_byte, 0, fin, 0, type_byte.length);
+        System.arraycopy(opcode_request_byte, 0, fin, type_byte.length, opcode_request_byte.length);
+      /*
+        for(int i=0;i<type_byte.length;i++){
+            fin[i]=type_byte[i];
         }
-        for(int j=0;j<opcode_byte.length;j++){
-            fin[type_opcode.length+j]=type_opcode[j];
+        for(int j=0;j<opcode_request_byte.length;j++){
+            fin[type_byte.length+j]=type_byte[j];
         }
+        */
         return fin;
     }
 
-    private byte[] FollowRegister(String[] split) {
+    private byte[] FollowRegisterUserList(String[] split,byte[]type_byte, byte[]opcode_request_byte) {
+        int num_users=Integer.parseInt(split[2]);
+        byte[]num_users_byte=shortToBytes((short)num_users);
+        byte[]names_list= new byte[1024];
+        String user_name;
+        byte[] username_byte;
+        int count=0;
+        for(int i=3;i<split.length;i++)
+        {
+            user_name=split[i];
+            username_byte=(user_name+"\0").getBytes();//uses utf8 by default
+            for(int j=0;j<username_byte.length;j++){
+                if(count+1>names_list.length){
+                    names_list = Arrays.copyOf(names_list, len * 2);
+                }
+                names_list[count]=username_byte[j];
+                count++;
+            }
+        }
+        byte[]ack_follow= DefaultConvert(type_byte,opcode_request_byte);
+        byte[]ack_follow_num=DefaultConvert(ack_follow,num_users_byte);
+        byte[]ack_foolow_num_users=DefaultConvert(ack_follow_num,names_list);
+        return ack_foolow_num_users;
+        }
 
-        return null;
-    }
 
-    private byte[] UserList(String[] split) {
-        return null;
-    }
-
-    private byte[] StatRegister(String[] split) {
-        return null;
+    private byte[] StatRegister(String[] split,byte[]type_byte, byte[]opcode_request_byte) {
+        int num_post=Integer.parseInt(split[2]);
+        byte[]num_post_byte=shortToBytes((short)num_post);
+        int num_followers=Integer.parseInt(split[3]);
+        byte[]num_followers_byte=shortToBytes((short)num_followers);
+        int num_following=Integer.parseInt(split[4]);
+        byte[]num_following_byte=shortToBytes((short)num_following);
+        byte[]ack_stat=DefaultConvert(type_byte,opcode_request_byte);
+        byte[]ack_stat_posts=DefaultConvert(ack_stat,num_post_byte);
+        byte[]ack_stat_posts_followers=DefaultConvert(ack_stat_posts,num_followers_byte);
+        byte[]fin=DefaultConvert(ack_stat_posts_followers,num_following_byte);
+        return  fin;
     }
 
 

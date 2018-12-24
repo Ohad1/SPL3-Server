@@ -12,5 +12,4 @@ public interface Connections<T> {
 
     void disconnect(int connectionId);
 
-    <T> int add(ConnectionHandlerImpl<T> handler);
 }

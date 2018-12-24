@@ -19,7 +19,7 @@ public abstract class BaseServer<T> implements Server<T> {
     private final Supplier<BidiMessagingProtocolImpl<T>> protocolFactory;
     private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
-    private Connections connections;
+    private ConnectionsImpl connections;
 
     public BaseServer(
             int port,

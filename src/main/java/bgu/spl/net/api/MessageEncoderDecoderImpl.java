@@ -143,7 +143,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         }
         if (nextByte == '\0') {
             restart();
-            return new String(bytes, 0, len, StandardCharsets.UTF_8);;
+            return new String(bytes, 0, len, StandardCharsets.UTF_8);
         }
         bytes[len++] = nextByte;
         return null;

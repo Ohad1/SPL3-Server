@@ -1,8 +1,4 @@
-package bgu.spl.net.srv.bidi;
-
-import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
-import bgu.spl.net.api.bidi.BidiMessagingProtocolImpl;
+package bgu.spl.net.Assignment3;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

@@ -1,12 +1,6 @@
-package bgu.spl.net.srv;
+package bgu.spl.net.Assignment3;
 
-import bgu.spl.net.api.MessageEncoderDecoder;
-import bgu.spl.net.api.MessagingProtocol;
-import bgu.spl.net.api.bidi.BidiMessagingProtocol;
-import bgu.spl.net.api.bidi.BidiMessagingProtocolImpl;
-import bgu.spl.net.api.bidi.Connections;
-import bgu.spl.net.api.bidi.ConnectionsImpl;
-import bgu.spl.net.srv.bidi.ConnectionHandlerImpl;
+import bgu.spl.net.srv.Server;
 
 import java.io.IOException;
 import java.net.ServerSocket;

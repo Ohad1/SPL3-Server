@@ -1,4 +1,4 @@
-package bgu.spl.net.api.bidi;
+package bgu.spl.net.Assignment3;
 
 public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<T> {
 

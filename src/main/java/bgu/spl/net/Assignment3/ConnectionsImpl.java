@@ -1,6 +1,4 @@
-package bgu.spl.net.api.bidi;
-
-import bgu.spl.net.srv.bidi.ConnectionHandlerImpl;
+package bgu.spl.net.Assignment3;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;

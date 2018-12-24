@@ -1,8 +1,4 @@
-package bgu.spl.net.api.bidi;
-
-import bgu.spl.net.srv.bidi.ConnectionHandlerImpl;
-
-import java.io.IOException;
+package bgu.spl.net.Assignment3;
 
 public interface Connections<T> {
 

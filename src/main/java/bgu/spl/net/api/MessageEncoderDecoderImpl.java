@@ -2,9 +2,7 @@ package bgu.spl.net.api;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.stream.Stream;
 
 public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> {
 
@@ -68,13 +66,13 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
             case 4:
                 return decodeNextByteFollow(nextByte);
             case 5:
-                return decodeNextBytePost(nextByte);
+                return decodeNextBytePostStat(nextByte);
             case 6:
                 return decodeNextBytePm(nextByte);
             case 7:
-                return decodeNextByteUserlist(nextByte);
+                return Short.toString(opcode);
             case 8:
-                return decodeNextByteStat(nextByte);
+                return decodeNextBytePostStat(nextByte);
         }
         return null;
     }
@@ -139,17 +137,40 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         }
         return null;
     }
-    private String decodeNextBytePost(byte nextByte) {
-        return "";
+    private String decodeNextBytePostStat(byte nextByte) {
+        if (len >= bytes.length) {
+            bytes = Arrays.copyOf(bytes, len * 2);
+        }
+        if (nextByte == '\0') {
+            restart();
+            return new String(bytes, 0, len, StandardCharsets.UTF_8);;
+        }
+        bytes[len++] = nextByte;
+        return null;
     }
     private String decodeNextBytePm(byte nextByte) {
-        return "";
-    }
-    private String decodeNextByteUserlist(byte nextByte) {
-        return "";
-    }
-    private String decodeNextByteStat(byte nextByte) {
-        return "";
+        if (len >= bytes.length) {
+            bytes = Arrays.copyOf(bytes, len * 2);
+        }
+        if (nextByte == '\0') {
+            numOfZeros++;
+            if (numOfZeros==1) {
+                String username = new String(bytes, 0, len, StandardCharsets.UTF_8);
+                output += " " + username;
+                len = 0;
+            }
+            else if (numOfZeros==2) {
+                String content = new String(bytes, 0, len, StandardCharsets.UTF_8);
+                output += " " + content;
+                String result = output;
+                restart();
+                return result;
+            }
+        }
+        else {
+            bytes[len++] = nextByte;
+        }
+        return null;
     }
 
     public byte[] encode(String message) {

@@ -4,8 +4,9 @@ public class BidiMessagingProtocolImpl<T> implements BidiMessagingProtocol<T> {
 
     private  int con_id;
     private Connections connections;
-
-    public BidiMessagingProtocolImpl() {
+    private Manager manager;
+    public BidiMessagingProtocolImpl(Manager manager) {
+        this.manager = manager;
     }
 
     public void start(int connectionId, Connections<T> connections) {

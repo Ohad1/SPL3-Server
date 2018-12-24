@@ -2,17 +2,16 @@ package bgu.spl.net.Assignment3;
 
 import java.util.Date;
 
-public class PrivateMessage {
-    private String sender;
+public class PrivateMessage extends Message{
     private String recipient;
-    private String content;
-    private Date timesent;
-
 
     public PrivateMessage(String sender, String recipient, String content) {
-        this.sender = sender;
+        super(sender, content);
         this.recipient = recipient;
-        this.content = content;
-        this.timesent =  new Date();
     }
+
+    public String getRecipient() {
+        return recipient;
+    }
+
 }

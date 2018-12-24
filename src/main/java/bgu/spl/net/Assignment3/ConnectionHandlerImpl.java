@@ -5,7 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-public class ConnectionHandlerImpl<T> implements ConnectionHandler<T> {
+public class ConnectionHandlerImpl<T> implements Runnable, ConnectionHandler<T> {
     private final BidiMessagingProtocolImpl<T> protocol;
     private final MessageEncoderDecoder<T> encdec;
     private final Socket sock;
@@ -20,13 +20,18 @@ public class ConnectionHandlerImpl<T> implements ConnectionHandler<T> {
         this.protocol = protocol;
         this.connectionId = -1;
     }
-    public void send(T msg) {
+
+    public void send(T msg) { // todo check generic
+        try {
+            out.write(encdec.encode(msg));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void run() {
         try (Socket sock = this.sock) { //just for automatic closing
             int read;
-
             in = new BufferedInputStream(sock.getInputStream());
             out = new BufferedOutputStream(sock.getOutputStream());
 

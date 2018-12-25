@@ -11,14 +11,14 @@ public abstract class BaseServer<T> implements Server<T> {
 
     private final int port;
     private final Supplier<BidiMessagingProtocolImpl<T>> protocolFactory;
-    private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
+    private final Supplier<MessageEncoderDecoderImpl> encdecFactory;
     private ServerSocket sock;
     private ConnectionsImpl connections;
 
     public BaseServer(
             int port,
             Supplier<BidiMessagingProtocolImpl<T>> protocolFactory,
-            Supplier<MessageEncoderDecoder<T>> encdecFactory) {
+            Supplier<MessageEncoderDecoderImpl> encdecFactory) {
 
         this.port = port;
         this.protocolFactory = protocolFactory;

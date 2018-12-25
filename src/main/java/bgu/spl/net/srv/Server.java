@@ -1,7 +1,6 @@
 package bgu.spl.net.srv;
 
-import bgu.spl.net.Assignment3.BaseServer;
-import bgu.spl.net.Assignment3.MessageEncoderDecoder;
+import bgu.spl.net.Assignment3.*;
 import bgu.spl.net.api.MessagingProtocol;
 import java.io.Closeable;
 import java.util.function.Supplier;
@@ -23,13 +22,13 @@ public interface Server<T> extends Closeable {
      */
     public static <T> Server<T>  threadPerClient(
             int port,
-            Supplier<MessagingProtocol<T> > protocolFactory,
-            Supplier<MessageEncoderDecoder<T> > encoderDecoderFactory) {
+            Supplier<BidiMessagingProtocolImpl<T>> protocolFactory,
+            Supplier<MessageEncoderDecoderImpl> encoderDecoderFactory) {
 
         return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory) {
             @Override
-            protected void execute(BlockingConnectionHandler<T>  handler) {
-                new Thread(handler).start();
+            protected void execute(ConnectionHandlerImpl<T> handler) {
+
             }
         };
 
@@ -47,7 +46,7 @@ public interface Server<T> extends Closeable {
     public static <T> Server<T> reactor(
             int nthreads,
             int port,
-            Supplier<MessagingProtocol<T>> protocolFactory,
+            Supplier<BidiMessagingProtocolImpl<T>> protocolFactory,
             Supplier<MessageEncoderDecoder<T>> encoderDecoderFactory) {
         return new Reactor<T>(nthreads, port, protocolFactory, encoderDecoderFactory);
     }

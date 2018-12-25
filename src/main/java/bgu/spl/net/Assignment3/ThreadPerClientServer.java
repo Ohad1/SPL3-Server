@@ -6,7 +6,7 @@ public class ThreadPerClientServer<T> extends BaseServer<T> {
 
     public ThreadPerClientServer (int port,
         Supplier<BidiMessagingProtocolImpl<T>> protocolFactory,
-        Supplier<MessageEncoderDecoder<T>> encdecFactory) {
+        Supplier<MessageEncoderDecoderImpl> encdecFactory) {
         super(port, protocolFactory, encdecFactory);
     }
 

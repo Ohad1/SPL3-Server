@@ -14,11 +14,12 @@ public class ConnectionsImpl<T> implements Connections<T> {
     public ConnectionsImpl() {
         this.connectionHandlerConcurrentHashMap = new ConcurrentHashMap<>();
         this.countId = new AtomicInteger(0);
-        readWriteLock = new ReentrantReadWriteLock();
+        this.readWriteLock = new ReentrantReadWriteLock();
     }
 
     public boolean send(int connectionId, T msg) {
         if (!connectionHandlerConcurrentHashMap.containsKey(connectionId)) {
+
             return false;
         }
         ConnectionHandlerImpl connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);

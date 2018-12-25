@@ -69,4 +69,12 @@ public class User {
     public AtomicInteger getFollowing() {
         return following;
     }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public ConcurrentLinkedQueue<Message> getUnreadMessages() {
+        return unreadMessages;
+    }
 }

@@ -202,12 +202,13 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     private byte[] Notification(String[]split,String line, byte[] type_byte) {
 
         byte[]pm_post=(split[1]).getBytes();//TODO CHECK CHAR
-        byte[]posting_user=(split[2]+"\0").getBytes();
+        byte[]posting_user=(split[2]+'\0').getBytes();
         String s="";
         for(int i=3;i<split.length;i++){
             s=s.concat(split[i]+" ");
         }
-        byte[]content=(s+"\0").getBytes();
+        s=s.substring(0,s.length()-1);
+        byte[]content=(s+'\0').getBytes();
 
         byte[]opcode_char=DefaultConvert(type_byte,pm_post);
         byte[]opcode_char_postuser=DefaultConvert(opcode_char,posting_user);
@@ -269,7 +270,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         for(int i=3;i<split.length;i++)
         {
             user_name=split[i];
-            username_byte=(user_name+"\0").getBytes();//uses utf8 by default
+            username_byte=(user_name+'\0').getBytes();//uses utf8 by default
             for(int j=0;j<username_byte.length;j++){
                 if(count+1>names_list.length){
                     names_list = Arrays.copyOf(names_list, len * 2);

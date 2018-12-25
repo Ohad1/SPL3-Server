@@ -5,23 +5,23 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-public class ConnectionHandlerImpl<T> implements Runnable, ConnectionHandler<T> {
-    private final BidiMessagingProtocolImpl<T> protocol;
-    private final MessageEncoderDecoder<T> encdec;
+public class ConnectionHandlerImpl implements Runnable, ConnectionHandler<String> {
+    private final BidiMessagingProtocol<String> protocol;
+    private final MessageEncoderDecoder<String> encdec;
     private final Socket sock;
     private BufferedInputStream in;
     private BufferedOutputStream out;
     private volatile boolean connected = true;
     private int connectionId;
 
-    public ConnectionHandlerImpl(Socket sock, MessageEncoderDecoder<T> reader, BidiMessagingProtocolImpl<T> protocol) {
+    public ConnectionHandlerImpl(Socket sock, MessageEncoderDecoder<String> reader, BidiMessagingProtocol<String> protocol) {
         this.sock = sock;
         this.encdec = reader;
         this.protocol = protocol;
         this.connectionId = -1;
     }
 
-    public void send(T msg) { // todo check generic
+    public void send(String msg) { // todo check generic
         try {
             out.write(encdec.encode(msg));
         } catch (IOException e) {
@@ -36,7 +36,7 @@ public class ConnectionHandlerImpl<T> implements Runnable, ConnectionHandler<T> 
             out = new BufferedOutputStream(sock.getOutputStream());
 
             while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
-                T nextMessage = encdec.decodeNextByte((byte) read);
+                String nextMessage = encdec.decodeNextByte((byte) read);
                 if (nextMessage != null) {
                     protocol.process(nextMessage);
                 }

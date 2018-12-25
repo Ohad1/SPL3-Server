@@ -1,5 +1,6 @@
 package bgu.spl.net.Assignment3;
 
+import bgu.spl.net.srv.ConnectionsImpl;
 import bgu.spl.net.srv.Server;
 
 import java.io.IOException;
@@ -10,15 +11,15 @@ import java.util.function.Supplier;
 public abstract class BaseServer<T> implements Server<T> {
 
     private final int port;
-    private final Supplier<BidiMessagingProtocolImpl<T>> protocolFactory;
-    private final Supplier<MessageEncoderDecoderImpl> encdecFactory;
+    private final Supplier<BidiMessagingProtocol<T>> protocolFactory;
+    private final Supplier<MessageEncoderDecoder<T>> encdecFactory;
     private ServerSocket sock;
     private ConnectionsImpl connections;
 
     public BaseServer(
             int port,
-            Supplier<BidiMessagingProtocolImpl<T>> protocolFactory,
-            Supplier<MessageEncoderDecoderImpl> encdecFactory) {
+            Supplier<BidiMessagingProtocol<T>> protocolFactory,
+            Supplier<MessageEncoderDecoder<T>> encdecFactory) {
 
         this.port = port;
         this.protocolFactory = protocolFactory;
@@ -32,15 +33,15 @@ public abstract class BaseServer<T> implements Server<T> {
 
         try (ServerSocket serverSock = new ServerSocket(port)) {
 			System.out.println("Server started");
-            BidiMessagingProtocolImpl protocol=  protocolFactory.get();
+            BidiMessagingProtocol<T> protocol=  protocolFactory.get();
 
             this.sock = serverSock; //just to be able to close
 
             while (!Thread.currentThread().isInterrupted()) {
-
+                System.out.println("waiting");
                 Socket clientSock = serverSock.accept();
 
-                ConnectionHandlerImpl<T> handler = new ConnectionHandlerImpl<>(
+                ConnectionHandler<T> handler = new BlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
                         protocol);
@@ -62,6 +63,6 @@ public abstract class BaseServer<T> implements Server<T> {
 
     }
 
-    protected abstract void execute(ConnectionHandlerImpl<T>  handler);
+    protected abstract void execute(ConnectionHandler<T>  handler);
 
 }

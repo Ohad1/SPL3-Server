@@ -25,6 +25,16 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         if (opNum == 1) {
             String username = splited[1];
             String password = splited[2];
+            if (manager.containsUser(username) | isLoggedIn) {
+                //error
+            }
+            else {
+                manager.addUserToMap(username, password);
+            }
+        }
+        else if (opNum == 2) {
+            String username = splited[1];
+            String password = splited[2];
             if (!manager.containsUser(username) ||
                     isLoggedIn ||
                     manager.getUser(username).getPassword()!=password) {
@@ -36,19 +46,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 user.setLoggedin(true);
                 for (Message mess : user.getUnreadMessages()) {
                     if (mess instanceof Post) {
-                        connections.send(connectionId, )
+                        connections.send(connectionId, "9 1 " + mess.getSender() + " " + mess.getContent());
+                    }
+                    else {
+                        connections.send(connectionId, "9 0 " + mess.getSender() + " " + mess.getContent());
                     }
                 }
-            }
-        }
-        else if (opNum == 2) {
-            String username = splited[1];
-            String password = splited[2];
-            if (manager.containsUser(username) | isLoggedIn) {
-                //error
-            }
-            else {
-                manager.addUserToMap(username, password);
             }
         }
         else if (opNum == 3) {

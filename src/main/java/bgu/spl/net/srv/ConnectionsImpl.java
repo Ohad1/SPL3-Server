@@ -1,4 +1,7 @@
-package bgu.spl.net.Assignment3;
+package bgu.spl.net.srv;
+
+import bgu.spl.net.Assignment3.ConnectionHandler;
+import bgu.spl.net.Assignment3.Connections;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -7,7 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ConnectionsImpl<T> implements Connections<T> {
 
-    ConcurrentHashMap<Integer, ConnectionHandlerImpl> connectionHandlerConcurrentHashMap;
+    ConcurrentHashMap<Integer, bgu.spl.net.Assignment3.ConnectionHandler> connectionHandlerConcurrentHashMap;
     AtomicInteger countId;
     private ReadWriteLock readWriteLock;
 
@@ -19,10 +22,9 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     public boolean send(int connectionId, T msg) {
         if (!connectionHandlerConcurrentHashMap.containsKey(connectionId)) {
-
             return false;
         }
-        ConnectionHandlerImpl connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
+        bgu.spl.net.Assignment3.ConnectionHandler connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
         connectionHandler.send(msg);
         return true;
     }
@@ -30,7 +32,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
     public void broadcast(T msg) {
         readWriteLock.readLock().lock();
         try {
-            for (ConnectionHandlerImpl connectionHandler : connectionHandlerConcurrentHashMap.values()) {
+            for (bgu.spl.net.Assignment3.ConnectionHandler connectionHandler : connectionHandlerConcurrentHashMap.values()) {
                 connectionHandler.send(msg);
             }
         } finally {
@@ -42,7 +44,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     }
 
-    public int add(ConnectionHandlerImpl connectionHandler) {
+    public int add(ConnectionHandler connectionHandler) {
         readWriteLock.writeLock().lock();
         try {
             int id = countId.getAndIncrement();

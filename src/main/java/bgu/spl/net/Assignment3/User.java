@@ -97,6 +97,10 @@ public class User {
         following.getAndIncrement();
     }
 
+    public void decrementFollowing() {
+        following.getAndDecrement();
+    }
+
     public AtomicInteger getNumOfFollowing() {
         return following;
     }

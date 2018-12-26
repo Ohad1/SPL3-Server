@@ -12,9 +12,9 @@ public class User {
     private String password;
     private Boolean isLoggedin;
     private int ConnId;
-    private ConcurrentLinkedQueue<String> userPosts;
-    private ConcurrentLinkedQueue<String> unreadMessages;
-    private ConcurrentLinkedQueue<String> userPrivateMessages;
+    private LinkedList<String> userPosts;
+    private LinkedList<String> unreadMessages;
+    private LinkedList<String> userPrivateMessages;
     private ConcurrentLinkedQueue<String> followers; // number of people that follow me
     private AtomicInteger following; // number of people i follow
     private final ReadWriteLock readWriteLockPosts;
@@ -25,9 +25,9 @@ public class User {
         this.password = password;
         this.isLoggedin = false;
         this.ConnId = -1;
-        this.userPosts = new ConcurrentLinkedQueue<>();
-        this.unreadMessages = new ConcurrentLinkedQueue<>();
-        this.userPrivateMessages = new ConcurrentLinkedQueue<>();
+        this.userPosts = new LinkedList<>();
+        this.unreadMessages = new LinkedList<>();
+        this.userPrivateMessages = new LinkedList<>();
         this.followers = new ConcurrentLinkedQueue<>();
         this.following = new AtomicInteger(0);
         this.readWriteLockPosts = new ReentrantReadWriteLock();
@@ -62,7 +62,7 @@ public class User {
         ConnId = connId;
     }
 
-    public void addPost(Post post) {
+    public void addPost(String post) {
         readWriteLockPosts.writeLock().lock();
         try {
             userPosts.add(post);
@@ -82,7 +82,7 @@ public class User {
         }
     }
 
-    public void addPrivateMessage(PrivateMessage privateMessage) {
+    public void addPrivateMessage(String privateMessage) {
         userPrivateMessages.add(privateMessage);
     }
 
@@ -138,7 +138,11 @@ public class User {
         else
             return false;
     }
-    public ConcurrentLinkedQueue<Message> getUnreadMessages() {
+    public LinkedList<String> getUnreadMessages() {
         return unreadMessages;
+    }
+
+    public void addUnreadMessage(String message) {
+        unreadMessages.add(message);
     }
 }

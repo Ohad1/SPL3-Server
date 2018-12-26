@@ -53,12 +53,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 user.setLoggedin(true);
                 user.setConnId(connectionId);
                 connections.send(connectionId, "10 2");
-                for (Message mess : user.getUnreadMessages()) {
-                    if (mess instanceof Post) {
-                        connections.send(connectionId, "9 1 " + mess.getSender() + " " + mess.getContent());
-                    } else {
-                        connections.send(connectionId, "9 0 " + mess.getSender() + " " + mess.getContent());
-                    }
+                for (String mess : user.getUnreadMessages()) {
+                    connections.send(connectionId, mess);
                 }
             }
         } else if (opNum == 3) {//LOGOUT
@@ -146,13 +142,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 for (String reciever : result) {
                     User recieverUser = manager.getUser(reciever);
                     String output = "9 1 " + username + " " + content;
-                    if (recieverUser.getConnId()==-1) {
-//                        recieverUser.ad
-                    }
-                    else {
-
+                    Boolean isSent = connections.send(recieverUser.getConnId(), output);
+                    if (!isSent) {
+                        recieverUser.addUnreadMessage(output);
                     }
                 }
+                sendingUser.addPost(content);
+                connections.send(connectionId, "10 5");
             }
 
         } else if (opNum == 6) {

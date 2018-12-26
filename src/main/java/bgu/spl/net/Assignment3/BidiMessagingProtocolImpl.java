@@ -16,6 +16,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         this.connectionId =connectionId;
         this.connections=connections;
         this.isLoggedIn = false;
+
     }
 
     public void process(String message) {
@@ -35,20 +36,21 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 connections.send(connectionId, "10 1");
             }
         }
-        else if (opNum == 2) {
+        else if (opNum == 2) { //LOGIN
             String username = splited[1];
             String password = splited[2];
             if (!manager.containsUser(username) ||
                     isLoggedIn ||
                     manager.getUser(username).getPassword()!=password) {
                 //error
-                connections.send(connectionId, "11 1");
+                connections.send(connectionId, "11 2");
             }
             else {
+                manager.addConidName(connectionId,username);
                 isLoggedIn = true;
                 User user = manager.getUser(username);
                 user.setLoggedin(true);
-                connections.send(connectionId, "10 1");
+                connections.send(connectionId, "10 2");
                 for (Message mess : user.getUnreadMessages()) {
                     if (mess instanceof Post) {
                         connections.send(connectionId, "9 1 " + mess.getSender() + " " + mess.getContent());
@@ -59,11 +61,57 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 }
             }
         }
-        else if (opNum == 3) {
-
+        else if (opNum == 3) {//LOGOUT
+            String username=manager.getUserName(connectionId);
+            User user=manager.getUser(username);
+            if(isLoggedIn) { // connect
+                isLoggedIn=false;
+                user.setLoggedin(false);
+                manager.removeFromConidName(connectionId);
+                connections.send(connectionId,"10 3");// ACK LOGOUT
+            }
+            else // not connect=ERROR
+                connections.send(connectionId,"11 3");
         }
-        else if (opNum == 4) {
+        else if (opNum == 4) { //FOLLOW
+            int counter=0;
+            if(!isLoggedIn ){ //ERROR
+                connections.send(connectionId,"11 4");
+            }
+            String username=manager.getUserName(connectionId);
+            User user=manager.getUser(username);
+            String name_fromlist;
+            User user_fromlist;
+            String f_o=splited[1];
+            int num_users_to_follow=Integer.parseInt(splited[2]);
 
+            if(f_o.equals("0")) //FOLLOW
+            {
+                for (int i = 0; i < num_users_to_follow; i++) {
+                    name_fromlist = splited[i];
+                    user_fromlist=manager.getUser(name_fromlist);
+                    if (!user_fromlist.alreadyInFollowers(username)) {
+                        user_fromlist.addFollowers(username);
+                        user.incrementFollowing();
+                        counter++;
+                    }
+                }
+            }
+            if(f_o.equals("1"))//UNFOLLOW
+            {
+                for (int i = 0; i < num_users_to_follow; i++) {
+                    name_fromlist = splited[i];
+                    user_fromlist=manager.getUser(name_fromlist);
+                    if (user_fromlist.alreadyInFollowers(username)) {
+                        //user_fromlist.removeFollowers(username);
+                        //user.decrementFollowing();
+                        counter++;
+                    }
+                }
+            }
+            if(counter==0) {
+                connections.send(connectionId,"11 4");
+            }
         }
         else if (opNum == 5) {
 

@@ -74,6 +74,12 @@ public class User {
         return password;
     }
 
+    public boolean alreadyInFollowers(String username){
+        if(followers.contains(username))
+            return true;
+        else
+            return false;
+    }
     public ConcurrentLinkedQueue<Message> getUnreadMessages() {
         return unreadMessages;
     }

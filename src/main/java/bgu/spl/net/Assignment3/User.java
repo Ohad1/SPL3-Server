@@ -11,7 +11,7 @@ public class User {
     private Boolean isLoggedin;
     private ConcurrentLinkedQueue<Post> userPosts;
     private ConcurrentLinkedQueue<Message> unreadMessages;
-    private ConcurrentLinkedQueue<PrivateMessage> userPrivateMessages;
+    private ConcurrentLinkedQueue<String> userPrivateMessages;
     private ConcurrentLinkedQueue<String> followers; // number of people that follow me
     private AtomicInteger following; // number of people i follow
     private final ReadWriteLock readWriteLockPosts;
@@ -59,7 +59,7 @@ public class User {
         }
     }
 
-    public void addPrivateMessage(PrivateMessage privateMessage) {
+    public void addPrivateMessage(String privateMessage) {
         userPrivateMessages.add(privateMessage);
     }
 

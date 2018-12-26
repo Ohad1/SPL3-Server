@@ -1,5 +1,6 @@
 package bgu.spl.net.Assignment3;
 
+import javax.jws.soap.SOAPBinding;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -138,8 +139,48 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
 
         }
         else if (opNum == 6) {
-            String recieivingUsername = splited[1];
-//            manager.getConIDNameHashMap().get();
+            String name = splited[1];
+            String user_name = manager.getUserName(connectionId);
+            if (user_name != null) {
+                User user = manager.getUser(user_name);
+                if (user.getLoggedin()) {
+                    String content = "";
+                    String output = "";
+                    for (int i = 2; i < splited.length; i++) {
+                        content += splited[i];
+                    }
+                    User user_to_send = manager.getUser(name);
+                    if (user_to_send != null) {
+                        if (user_to_send.getLoggedin()) // login
+                        {
+                            int id;
+                             id= user. getId();
+                           if(connections.send(id, output))
+                               user.addPrivateMessage(user_name+" "+content);
+                           else{
+                                user_to_send.addUnRead("9 0 " + user_name + " " + content); //add to unread
+                           }
+                            user.addPrivateMessage(output);
+                        } else // LOGOUT
+                        {
+                            output = "9 0 " + user_name + " " + content;
+                            user.addPrivateMessage(user_name + " " + content);
+                            user_to_send.addUnRead(output);
+                        }
+                    }
+                    else //user_to_send not register
+                    {
+                        connections.send(connectionId, "11 6");//error
+                    }
+                }
+                else // user not logged in
+                    connections.send(connectionId, "11 6");//error
+
+            }
+            else // user not registered
+            {
+                connections.send(connectionId, "11 6");//error
+            }
         }
         else if (opNum == 7) {
             String output = "10 7 ";

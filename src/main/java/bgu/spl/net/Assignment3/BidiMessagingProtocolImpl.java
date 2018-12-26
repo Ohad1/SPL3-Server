@@ -19,7 +19,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
     }
 
     public void process(String message) {
-        System.out.println("Message:" + message);
+        System.out.println("Message: " + message);
         String[] splited = message.split(" ");
         int opNum = Integer.parseInt(splited[0]);
         if (opNum == 1) {
@@ -38,11 +38,21 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         else if (opNum == 2) {
             String username = splited[1];
             String password = splited[2];
-            if (!manager.containsUser(username) ||
-                    isLoggedIn ||
-                    manager.getUser(username).getPassword()!=password) {
-                //error
+            System.out.println(manager.getUser(username).getPassword());
+            System.out.println(password);
+            System.out.println(!manager.containsUser(username));
+            System.out.println(isLoggedIn);
+            System.out.println(!manager.getUser(username).getPassword().equals(password));
+            if (!manager.containsUser(username)) {
                 connections.send(connectionId, "11 1");
+            }
+            else if (isLoggedIn) {
+                connections.send(connectionId, "11 1");
+
+            }
+            else if (!manager.getUser(username).getPassword().equals(password)) {
+                connections.send(connectionId, "11 1");
+
             }
             else {
                 isLoggedIn = true;

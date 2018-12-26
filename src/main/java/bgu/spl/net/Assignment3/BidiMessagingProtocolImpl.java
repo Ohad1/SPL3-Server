@@ -1,5 +1,7 @@
 package bgu.spl.net.Assignment3;
 
+import java.util.List;
+
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> {
 
     private  int connectionId;
@@ -43,16 +45,10 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             System.out.println(!manager.containsUser(username));
             System.out.println(isLoggedIn);
             System.out.println(!manager.getUser(username).getPassword().equals(password));
-            if (!manager.containsUser(username)) {
+            if (!manager.containsUser(username) ||
+                    isLoggedIn ||
+                    !manager.getUser(username).getPassword().equals(password)) {
                 connections.send(connectionId, "11 1");
-            }
-            else if (isLoggedIn) {
-                connections.send(connectionId, "11 1");
-
-            }
-            else if (!manager.getUser(username).getPassword().equals(password)) {
-                connections.send(connectionId, "11 1");
-
             }
             else {
                 isLoggedIn = true;
@@ -82,10 +78,21 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
 
         }
         else if (opNum == 7) {
-
+            String output = "10 7 ";
+            List<String> registeredUsers = manager.getRegisteredUsers();
+            output += registeredUsers.size() + " ";
+            for (String user : registeredUsers) {
+                output += user + " ";
+            }
+            output = output.substring(0, output.length()-2);
+            connections.send(connectionId, output);
         }
         else if (opNum == 8) {
-
+            String output = "10 8 ";
+            String username = splited[1];
+            User user = manager.getUser(username);
+            output += user.getNumOfPosts() + " " + user.getNumOfFollowers() + " " + user.getNumOfFollowing();
+            connections.send(connectionId, output);
         }
     }
 

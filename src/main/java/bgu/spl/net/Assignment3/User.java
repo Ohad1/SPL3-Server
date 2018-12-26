@@ -1,8 +1,9 @@
 package bgu.spl.net.Assignment3;
 
-import java.util.Date;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class User {
     private String username;
@@ -13,7 +14,9 @@ public class User {
     private ConcurrentLinkedQueue<PrivateMessage> userPrivateMessages;
     private ConcurrentLinkedQueue<String> followers; // number of people that follow me
     private AtomicInteger following; // number of people i follow
-    private Object lock;
+    private final ReadWriteLock readWriteLockPosts;
+    private final ReadWriteLock readWriteLockFollowers;
+
 
     public User(String username, String password) {
         this.username = username;
@@ -24,6 +27,8 @@ public class User {
         this.userPrivateMessages = new ConcurrentLinkedQueue<>();
         this.followers = new ConcurrentLinkedQueue<>();
         this.following = new AtomicInteger(0);
+        this.readWriteLockPosts = new ReentrantReadWriteLock();
+        this.readWriteLockFollowers = new ReentrantReadWriteLock();
     }
 
     public Boolean getLoggedin() {
@@ -35,14 +40,22 @@ public class User {
     }
 
     public void addPost(Post post) {
-        synchronized (userPosts) {
+        readWriteLockPosts.writeLock().lock();
+        try {
             userPosts.add(post);
+        }
+        finally {
+            readWriteLockPosts.writeLock().unlock();
         }
     }
 
     public int getNumOfPosts () {
-        synchronized (userPosts) {
+        readWriteLockPosts.readLock().lock();
+        try {
             return userPosts.size();
+        }
+        finally {
+            readWriteLockPosts.readLock().unlock();
         }
     }
 
@@ -50,15 +63,33 @@ public class User {
         userPrivateMessages.add(privateMessage);
     }
 
-    public void addFollowers(String string) {
-        synchronized (followers) {
+    public void addFollower(String string) {
+        readWriteLockFollowers.writeLock().lock();
+        try {
             followers.add(string);
+        }
+        finally {
+            readWriteLockFollowers.writeLock().unlock();
+        }
+    }
+
+    public void removeFollower(String string) {
+        readWriteLockFollowers.writeLock().lock();
+        try {
+            followers.remove(string);
+        }
+        finally {
+            readWriteLockFollowers.writeLock().unlock();
         }
     }
 
     public int getNumOfFollowers () {
-        synchronized (followers) {
+        readWriteLockFollowers.readLock().lock();
+        try {
             return followers.size();
+        }
+        finally {
+            readWriteLockFollowers.readLock().unlock();
         }
     }
 
@@ -66,7 +97,7 @@ public class User {
         following.getAndIncrement();
     }
 
-    public AtomicInteger getFollowing() {
+    public AtomicInteger getNumOfFollowing() {
         return following;
     }
 

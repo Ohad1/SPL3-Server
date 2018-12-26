@@ -150,11 +150,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 sendingUser.addPost(content);
                 connections.send(connectionId, "10 5");
             }
-
-        } else if (opNum == 6) {
-
-
-//            manager.getConIDNameHashMap().get();
         }
         else if (opNum == 6) {
             String name = splited[1];
@@ -172,18 +167,18 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                         if (user_to_send.getLoggedin()) // login
                         {
                             int id;
-                             id= user. getId();
+                             id= user.getConnId();
                            if(connections.send(id, output))
                                user.addPrivateMessage(user_name+" "+content);
                            else{
-                                user_to_send.addUnRead("9 0 " + user_name + " " + content); //add to unread
+                                user_to_send.addUnreadMessage("9 0 " + user_name + " " + content); //add to unread
                            }
                             user.addPrivateMessage(output);
                         } else // LOGOUT
                         {
                             output = "9 0 " + user_name + " " + content;
                             user.addPrivateMessage(user_name + " " + content);
-                            user_to_send.addUnRead(output);
+                            user_to_send.addUnreadMessage(output);
                         }
                     }
                     else //user_to_send not register

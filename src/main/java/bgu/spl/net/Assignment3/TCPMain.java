@@ -1,7 +1,5 @@
 package bgu.spl.net.Assignment3;
 
-import bgu.spl.net.srv.Server;
-
 import java.io.IOException;
 
 public class TCPMain {

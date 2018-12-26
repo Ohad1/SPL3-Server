@@ -1,7 +1,6 @@
 package bgu.spl.net.Assignment3;
 
 import bgu.spl.net.srv.ConnectionsImpl;
-import bgu.spl.net.srv.Server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -41,7 +40,7 @@ public abstract class BaseServer<T> implements Server<T> {
                 System.out.println("waiting");
                 Socket clientSock = serverSock.accept();
 
-                ConnectionHandler<T> handler = new BlockingConnectionHandler<>(
+                BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
                         protocol);
@@ -63,6 +62,6 @@ public abstract class BaseServer<T> implements Server<T> {
 
     }
 
-    protected abstract void execute(ConnectionHandler<T>  handler);
+    protected abstract void execute(BlockingConnectionHandler<T>  handler);
 
 }

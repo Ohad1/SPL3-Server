@@ -19,7 +19,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
     }
 
     public void process(String message) {
-        System.out.println(message);
+        System.out.println("Message:" + message);
         String[] splited = message.split(" ");
         int opNum = Integer.parseInt(splited[0]);
         if (opNum == 1) {

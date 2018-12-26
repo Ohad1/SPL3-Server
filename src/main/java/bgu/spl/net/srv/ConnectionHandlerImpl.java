@@ -1,4 +1,8 @@
-package bgu.spl.net.Assignment3;
+package bgu.spl.net.srv;
+
+import bgu.spl.net.Assignment3.BidiMessagingProtocol;
+import bgu.spl.net.Assignment3.ConnectionHandler;
+import bgu.spl.net.Assignment3.MessageEncoderDecoder;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

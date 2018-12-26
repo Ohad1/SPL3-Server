@@ -1,8 +1,7 @@
-package bgu.spl.net.srv;
+package bgu.spl.net.Assignment3;
 
-import bgu.spl.net.Assignment3.*;
-import bgu.spl.net.Assignment3.ConnectionHandler;
-import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.srv.Reactor;
+
 import java.io.Closeable;
 import java.util.function.Supplier;
 
@@ -28,8 +27,8 @@ public interface Server<T> extends Closeable {
 
         return new BaseServer<T>(port, protocolFactory, encoderDecoderFactory) {
             @Override
-            protected void execute(ConnectionHandler<T> handler) {
-
+            protected void execute(BlockingConnectionHandler<T> handler) {
+                new Thread(handler).start();
             }
         };
 

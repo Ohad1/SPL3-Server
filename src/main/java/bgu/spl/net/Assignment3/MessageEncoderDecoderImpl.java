@@ -27,6 +27,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         opcodeCount = 0;
         numOfZeros = 0;
         output = "";
+        countNum = 0;
     }
 
     public String decodeNextByte(byte nextByte) {

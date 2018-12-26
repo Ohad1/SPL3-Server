@@ -147,7 +147,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     User recieverUser = manager.getUser(reciever);
                     String output = "9 1 " + username + " " + content;
                     if (recieverUser.getConnId()==-1) {
-                        recieverUser.ad
+//                        recieverUser.ad
                     }
                     else {
 

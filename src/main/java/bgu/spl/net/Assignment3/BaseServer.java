@@ -30,18 +30,19 @@ public abstract class BaseServer<T> implements Server<T> {
 
         try (ServerSocket serverSock = new ServerSocket(port)) {
 			System.out.println("Server started");
+
             this.sock = serverSock; //just to be able to close
 
             while (!Thread.currentThread().isInterrupted()) {
                 BidiMessagingProtocol<T> protocol=  protocolFactory.get();
                 System.out.println("waiting");
                 Socket clientSock = serverSock.accept();
-
                 BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
                         protocol);
                 int connectionId = connections.add(handler);
+                System.out.println("base connid: " + connectionId);
                 protocol.start(connectionId, connections);
                 execute(handler);
             }

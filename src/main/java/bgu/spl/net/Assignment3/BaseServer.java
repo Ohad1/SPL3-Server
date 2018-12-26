@@ -1,7 +1,5 @@
 package bgu.spl.net.Assignment3;
 
-import bgu.spl.net.srv.ConnectionsImpl;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;

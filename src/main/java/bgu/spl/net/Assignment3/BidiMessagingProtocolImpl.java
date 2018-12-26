@@ -27,9 +27,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             String password = splited[2];
             if (manager.containsUser(username) | isLoggedIn) {
                 //error
+                connections.send(connectionId, "11 1");
             }
             else {
+                //success
                 manager.addUserToMap(username, password);
+                connections.send(connectionId, "10 1");
             }
         }
         else if (opNum == 2) {
@@ -39,11 +42,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     isLoggedIn ||
                     manager.getUser(username).getPassword()!=password) {
                 //error
+                connections.send(connectionId, "11 1");
             }
             else {
                 isLoggedIn = true;
                 User user = manager.getUser(username);
                 user.setLoggedin(true);
+                connections.send(connectionId, "10 1");
                 for (Message mess : user.getUnreadMessages()) {
                     if (mess instanceof Post) {
                         connections.send(connectionId, "9 1 " + mess.getSender() + " " + mess.getContent());

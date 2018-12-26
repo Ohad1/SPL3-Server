@@ -31,7 +31,27 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     }
 
     public String decodeNextByte(byte nextByte) {
-        if (opcodeCount == 0) {
+        if (opcodeCount==2) {
+            switch (opcode) {
+                case 1:
+                    return decodeNextByteRegisterLogin(nextByte);
+                case 2:
+                    return decodeNextByteRegisterLogin(nextByte);
+                case 3:
+                    return Short.toString(opcode);
+                case 4:
+                    return decodeNextByteFollow(nextByte);
+                case 5:
+                    return decodeNextBytePostStat(nextByte);
+                case 6:
+                    return decodeNextBytePm(nextByte);
+                case 7:
+                    return Short.toString(opcode);
+                case 8:
+                    return decodeNextBytePostStat(nextByte);
+            }
+        }
+        else if (opcodeCount == 0) {
             opcodeArray[opcodeCount] = nextByte;
             opcodeCount++;
             return null;
@@ -40,26 +60,9 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
             opcodeArray[opcodeCount] = nextByte;
             opcode = bytesToShort(opcodeArray);
             output += opcode;
-            opcodeCount = -1;
+            opcodeCount = 2;
         }
-        switch (opcode) {
-            case 1:
-                return decodeNextByteRegisterLogin(nextByte);
-            case 2:
-                return decodeNextByteRegisterLogin(nextByte);
-            case 3:
-                return Short.toString(opcode);
-            case 4:
-                return decodeNextByteFollow(nextByte);
-            case 5:
-                return decodeNextBytePostStat(nextByte);
-            case 6:
-                return decodeNextBytePm(nextByte);
-            case 7:
-                return Short.toString(opcode);
-            case 8:
-                return decodeNextBytePostStat(nextByte);
-        }
+
         return null;
     }
 

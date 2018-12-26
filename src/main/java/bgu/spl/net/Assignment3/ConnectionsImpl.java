@@ -1,4 +1,4 @@
-package bgu.spl.net.srv;
+package bgu.spl.net.Assignment3;
 
 import bgu.spl.net.Assignment3.ConnectionHandler;
 import bgu.spl.net.Assignment3.Connections;

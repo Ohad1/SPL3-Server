@@ -28,7 +28,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         if (opNum == 1) {
             String username = splited[1];
             String password = splited[2];
-            if (manager.containsUser(username) | isLoggedIn) {
+            if (manager.containsUser(username) || manager.getUser(username).getLoggedin()) {
                 //error
                 connections.send(connectionId, "11 1");
             }
@@ -42,13 +42,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             String username = splited[1];
             String password = splited[2];
             if (!manager.containsUser(username) ||
-                    isLoggedIn ||
+                    manager.getUser(username).getLoggedin() ||
                     !manager.getUser(username).getPassword().equals(password)) {
                 connections.send(connectionId, "11 1");
             }
             else {
                 manager.addConidName(connectionId,username);
-                isLoggedIn = true;
                 User user = manager.getUser(username);
                 user.setLoggedin(true);
                 connections.send(connectionId, "10 2");
@@ -65,8 +64,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         else if (opNum == 3) {//LOGOUT
             String username=manager.getUserName(connectionId);
             User user=manager.getUser(username);
-            if(isLoggedIn) { // connect
-                isLoggedIn=false;
+            if(user.getLoggedin()) { // connect
                 user.setLoggedin(false);
                 manager.removeFromConidName(connectionId);
                 connections.send(connectionId,"10 3");// ACK LOGOUT
@@ -92,7 +90,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     name_fromlist = splited[i];
                     user_fromlist=manager.getUser(name_fromlist);
                     if (!user_fromlist.alreadyInFollowers(username)) {
-                        user_fromlist.addFollowers(username);
+                        user_fromlist.addFollower(username);
                         user.incrementFollowing();
                         counter++;
                     }
@@ -118,7 +116,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
 
         }
         else if (opNum == 6) {
-
+            String recieivingUsername = splited[1];
+//            manager.getConIDNameHashMap().get();
         }
         else if (opNum == 7) {
             String output = "10 7 ";

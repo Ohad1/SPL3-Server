@@ -9,8 +9,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Manager {
     private ConcurrentHashMap<String, User> userNameHashMap;
-
-
     private ConcurrentHashMap<Integer, String> conIDNameHashMap;
 
     private final ReadWriteLock readWriteLock;
@@ -30,6 +28,10 @@ public class Manager {
     }
     public ConcurrentHashMap<String, User> getUserNameHashMap() {
         return userNameHashMap;
+    }
+
+    public ConcurrentHashMap<Integer, String> getConIDNameHashMap() {
+        return conIDNameHashMap;
     }
 
     public String getUserName(int connid){

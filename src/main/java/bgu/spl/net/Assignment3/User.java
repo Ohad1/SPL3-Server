@@ -1,5 +1,7 @@
 package bgu.spl.net.Assignment3;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -9,19 +11,20 @@ public class User {
     private String username;
     private String password;
     private Boolean isLoggedin;
-    private ConcurrentLinkedQueue<Post> userPosts;
-    private ConcurrentLinkedQueue<Message> unreadMessages;
-    private ConcurrentLinkedQueue<PrivateMessage> userPrivateMessages;
+    private int ConnId;
+    private ConcurrentLinkedQueue<String> userPosts;
+    private ConcurrentLinkedQueue<String> unreadMessages;
+    private ConcurrentLinkedQueue<String> userPrivateMessages;
     private ConcurrentLinkedQueue<String> followers; // number of people that follow me
     private AtomicInteger following; // number of people i follow
     private final ReadWriteLock readWriteLockPosts;
     private final ReadWriteLock readWriteLockFollowers;
 
-
     public User(String username, String password) {
         this.username = username;
         this.password = password;
         this.isLoggedin = false;
+        this.ConnId = -1;
         this.userPosts = new ConcurrentLinkedQueue<>();
         this.unreadMessages = new ConcurrentLinkedQueue<>();
         this.userPrivateMessages = new ConcurrentLinkedQueue<>();
@@ -37,6 +40,26 @@ public class User {
 
     public void setLoggedin(Boolean loggedin) {
         isLoggedin = loggedin;
+    }
+
+    public LinkedList<String> getFollowers() {
+        LinkedList<String> output = new LinkedList<>();
+        readWriteLockFollowers.readLock().lock();
+        try {
+            output.addAll(followers);
+            return output;
+        }
+        finally {
+            readWriteLockFollowers.readLock().unlock();
+        }
+    }
+
+    public int getConnId() {
+        return ConnId;
+    }
+
+    public void setConnId(int connId) {
+        ConnId = connId;
     }
 
     public void addPost(Post post) {

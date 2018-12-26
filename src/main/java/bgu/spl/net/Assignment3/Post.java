@@ -17,8 +17,6 @@ public class Post extends Message{
         }
     }
 
-
-
     public ConcurrentLinkedQueue<String> getTagged() {
         return tagged;
     }

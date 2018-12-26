@@ -1,5 +1,6 @@
 package bgu.spl.net.Assignment3;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> {
@@ -72,45 +73,62 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             else // not connect=ERROR
                 connections.send(connectionId,"11 3");
         }
+
+
         else if (opNum == 4) { //FOLLOW
-            int counter=0;
-            if(!isLoggedIn ){ //ERROR
-                connections.send(connectionId,"11 4");
+            int counter = 0;
+            List<String> names_success = new LinkedList<>();
+            String output;
+            if (!isLoggedIn) { //ERROR
+                connections.send(connectionId, "11 4");
             }
-            String username=manager.getUserName(connectionId);
-            User user=manager.getUser(username);
+            else{
+            String username = manager.getUserName(connectionId);
+            User user = manager.getUser(username);
             String name_fromlist;
             User user_fromlist;
-            String f_o=splited[1];
-            int num_users_to_follow=Integer.parseInt(splited[2]);
+            String f_o = splited[1];
+            int num_users_to_follow = Integer.parseInt(splited[2]);
 
-            if(f_o.equals("0")) //FOLLOW
+            if (f_o.equals("0")) //FOLLOW
             {
                 for (int i = 0; i < num_users_to_follow; i++) {
                     name_fromlist = splited[i];
-                    user_fromlist=manager.getUser(name_fromlist);
+                    user_fromlist = manager.getUser(name_fromlist);
                     if (!user_fromlist.alreadyInFollowers(username)) {
                         user_fromlist.addFollower(username);
                         user.incrementFollowing();
                         counter++;
+                        ((LinkedList<String>) names_success).addLast(name_fromlist);
                     }
                 }
             }
-            if(f_o.equals("1"))//UNFOLLOW
+            if (f_o.equals("1"))//UNFOLLOW
             {
                 for (int i = 0; i < num_users_to_follow; i++) {
                     name_fromlist = splited[i];
-                    user_fromlist=manager.getUser(name_fromlist);
+                    user_fromlist = manager.getUser(name_fromlist);
                     if (user_fromlist.alreadyInFollowers(username)) {
-                        //user_fromlist.removeFollowers(username);
-                        //user.decrementFollowing();
+                        user_fromlist.removeFollower(username);
+                        user.decrementFollowing();
                         counter++;
+                        ((LinkedList<String>) names_success).addLast(name_fromlist);
                     }
                 }
             }
-            if(counter==0) {
-                connections.send(connectionId,"11 4");
+            if (counter == 0) {
+                connections.send(connectionId, "11 4");
+            } else {
+                output = "10 4 " + counter;
+                for (int i = 0; i < counter; i++) {
+                    output += ((LinkedList<String>) names_success).removeFirst();
+                    output += " ";
+                    int size = output.length();
+                    output = output.substring(0, size - 1);
+                    connections.send(connectionId, output);
+                }
             }
+        }
         }
         else if (opNum == 5) {
 

@@ -165,7 +165,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
 
 
     public byte[] encode(String message) {
-        String[] split=new String[message.length()];
+        String[] split = message.split("\\s+");
         String type=split[0];
         switch (type) {
             case "10": //ACK

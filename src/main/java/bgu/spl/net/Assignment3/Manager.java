@@ -45,7 +45,7 @@ public class Manager {
     }
 
     public void addUserToMap(String name, String password) {
-        readWriteLock.writeLock();
+        readWriteLock.writeLock().lock();
         try {
             userNameHashMap.put(name, new User(name, password));
         } finally {

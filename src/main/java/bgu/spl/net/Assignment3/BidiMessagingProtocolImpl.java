@@ -95,11 +95,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 for (int i = 0; i < num_users_to_follow; i++) {
                     name_fromlist = splited[i];
                     user_fromlist = manager.getUser(name_fromlist);
-                    if (!user_fromlist.alreadyInFollowers(username)) {
-                        user_fromlist.addFollower(username);
-                        user.incrementFollowing();
-                        counter++;
-                        ((LinkedList<String>) names_success).addLast(name_fromlist);
+                    if(user_fromlist!=null) {
+                        if (!user_fromlist.alreadyInFollowers(username)) {
+                            user_fromlist.addFollower(username);
+                            user.incrementFollowing();
+                            counter++;
+                            ((LinkedList<String>) names_success).addLast(name_fromlist);
+                        }
                     }
                 }
             }
@@ -108,11 +110,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 for (int i = 0; i < num_users_to_follow; i++) {
                     name_fromlist = splited[i];
                     user_fromlist = manager.getUser(name_fromlist);
-                    if (user_fromlist.alreadyInFollowers(username)) {
-                        user_fromlist.removeFollower(username);
-                        user.decrementFollowing();
-                        counter++;
-                        ((LinkedList<String>) names_success).addLast(name_fromlist);
+                    if(user_fromlist!=null) {
+                        if (user_fromlist.alreadyInFollowers(username)) {
+                            user_fromlist.removeFollower(username);
+                            user.decrementFollowing();
+                            counter++;
+                            ((LinkedList<String>) names_success).addLast(name_fromlist);
+                        }
                     }
                 }
             }

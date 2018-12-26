@@ -24,6 +24,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
     public void send(T msg) { // todo check generic
         try {
             out.write(encdec.encode(msg));
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -42,6 +43,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
             b[3] = 1;
             System.out.println("writing");
             out.write(b);
+            out.flush();
             System.out.println("writing2");
             while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
                 T nextMessage = encdec.decodeNextByte((byte) read);

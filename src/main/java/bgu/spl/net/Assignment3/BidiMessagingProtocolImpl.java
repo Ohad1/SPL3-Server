@@ -151,7 +151,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 connections.send(connectionId, "10 5");
             }
         }
-        else if (opNum == 6) {
+        else if (opNum == 6) { //PM
             String name = splited[1];
             String user_name = manager.getUserName(connectionId);
             if (user_name != null) {
@@ -167,18 +167,22 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                         if (user_to_send.getLoggedin()) // login
                         {
                             int id;
-                             id= user.getConnId();
-                           if(connections.send(id, output))
-                               user.addPrivateMessage(user_name+" "+content);
-                           else{
+                            id= user_to_send.getConnId();
+                            if(connections.send(id, "9 0 " + user_name + " " + content))
+                            {
+                                connections.send(connectionId,"10 6");
+                            }
+                            else{ //send failed
                                 user_to_send.addUnreadMessage("9 0 " + user_name + " " + content); //add to unread
-                           }
-                            user.addPrivateMessage(output);
+                                connections.send(connectionId,"10 6"); //TODO CHECK
+                            }
+                            user.addPrivateMessage(user_name+" "+content); //TODO CHECK
                         } else // LOGOUT
                         {
                             output = "9 0 " + user_name + " " + content;
                             user.addPrivateMessage(user_name + " " + content);
                             user_to_send.addUnreadMessage(output);
+                            connections.send(connectionId,"10 6");//TODO CHECK
                         }
                     }
                     else //user_to_send not register

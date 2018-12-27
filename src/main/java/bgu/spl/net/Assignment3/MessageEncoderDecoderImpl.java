@@ -49,7 +49,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                 case 6:
                     return decodeNextBytePm(nextByte);
                 case 7:
-                    return Short.toString(opcode);
+                    System.out.println("case 7");return Short.toString(opcode);
                 case 8:
                     return decodeNextBytePostStat(nextByte);
             }

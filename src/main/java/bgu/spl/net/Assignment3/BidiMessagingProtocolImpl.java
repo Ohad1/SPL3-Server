@@ -122,7 +122,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 connections.send(connectionId, "11 4");
             }
             else {
-                String content = splited[1];
+                String content = message.substring(2);
                 System.out.println("conect " + content);
                 String[] splitedContent = content.split( " ");
                 LinkedList<String> tagged = new LinkedList<>();
@@ -137,9 +137,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 all.addAll(tagged);
                 all.addAll(followers);
                 LinkedList<String> result = new LinkedList(new LinkedHashSet(all));
-                for (String reciever : result) {
-                    System.out.println("sending to " + reciever);
-                }
                 for (String reciever : result) {
                     User recieverUser = manager.getUser(reciever);
                     String output = "9 1 " + username + " " + content;
@@ -209,6 +206,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 output += user + " ";
             }
             output = output.substring(0, output.length() - 2);
+            System.out.println("list: " + output);
             connections.send(connectionId, output);
         } else if (opNum == 8) {
             String output = "10 8 ";

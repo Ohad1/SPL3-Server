@@ -14,7 +14,7 @@ public class User {
     private int ConnId;
     private LinkedList<String> userPosts;
     private LinkedList<String> unreadMessages;
-    private LinkedList<String> userPrivateMessages;
+    private LinkedList<String> userPrivateMessages;// messages that the user sent
     private ConcurrentLinkedQueue<String> followers; // number of people that follow me
     private AtomicInteger following; // number of people i follow
     private final ReadWriteLock readWriteLockPosts;

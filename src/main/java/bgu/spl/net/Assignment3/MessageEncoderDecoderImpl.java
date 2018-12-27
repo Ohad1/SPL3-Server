@@ -14,6 +14,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     private byte[] opcodeArray = new byte[2];
 
     private int numOfZeros = 0;
+    private int followByte = -1;
     private HashMap<String,Short> types_codeMap;
 
     private byte[] numOfUsersArray = new byte[2];
@@ -95,16 +96,18 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         if (len >= bytes.length) {
             bytes = Arrays.copyOf(bytes, len * 2);
         }
-        if (output.length() == 0) {
-            output += nextByte;
+        if (output.length() == 1) {
+            output += " " + nextByte;
         }
-        else if (countNum == 0 | countNum == 1){
+        else if (countNum == 0){
             numOfUsersArray[countNum] = nextByte;
             countNum++;
         }
-        else if (countNum == 2){
+        else if (countNum == 1){
+            numOfUsersArray[countNum] = nextByte;
             numOfUsers = bytesToShort(numOfUsersArray);
             output += " " + numOfUsers;
+            countNum++;
         }
         else if (nextByte == '\0'){
             numOfUsers--;

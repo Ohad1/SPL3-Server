@@ -126,6 +126,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             }
             else {
                 String content = splited[1];
+                System.out.println("conect " + content);
                 String[] splitedContent = content.split( " ");
                 LinkedList<String> tagged = new LinkedList<>();
                 for (String string : splitedContent) {

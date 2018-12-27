@@ -132,8 +132,12 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
             bytes = Arrays.copyOf(bytes, len * 2);
         }
         if (nextByte == '\0') {
+            String content = new String(bytes, 0, len, StandardCharsets.UTF_8);
+            System.out.println(content);
+            output += " " + content;
+            String result = output;
             restart();
-            return new String(bytes, 0, len, StandardCharsets.UTF_8);
+            return result;
         }
         bytes[len++] = nextByte;
         return null;

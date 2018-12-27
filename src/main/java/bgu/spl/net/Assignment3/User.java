@@ -54,6 +54,10 @@ public class User {
         }
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     public int getConnId() {
         return ConnId;
     }

@@ -140,8 +140,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 all.addAll(followers);
                 LinkedList<String> result = new LinkedList(new LinkedHashSet(all));
                 for (String reciever : result) {
+                    System.out.println("sending to " + reciever);
+                }
+                for (String reciever : result) {
                     User recieverUser = manager.getUser(reciever);
                     String output = "9 1 " + username + " " + content;
+                    System.out.println("sending to " + recieverUser.getUsername());
                     Boolean isSent = connections.send(recieverUser.getConnId(), output);
                     if (!isSent) {
                         recieverUser.addUnreadMessage(output);

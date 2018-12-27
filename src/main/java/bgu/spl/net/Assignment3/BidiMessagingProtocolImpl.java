@@ -22,7 +22,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
 
     public void process(String message) {
         System.out.println("Message: " + message);
-        System.out.println("My id: " + connectionId);
         String[] splited = message.split(" ");
         int opNum = Integer.parseInt(splited[0]);
         if (opNum == 1) {
@@ -83,7 +82,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 if (f_o.equals("0")) //FOLLOW
                 {
                     for (int i = 0; i < num_users_to_follow; i++) {
-                        name_fromlist = splited[i];
+                        name_fromlist = splited[i+3];
                         user_fromlist = manager.getUser(name_fromlist);
                         if (!user_fromlist.alreadyInFollowers(username)) {
                             user_fromlist.addFollower(username);
@@ -96,7 +95,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 if (f_o.equals("1"))//UNFOLLOW
                 {
                     for (int i = 0; i < num_users_to_follow; i++) {
-                        name_fromlist = splited[i];
+                        name_fromlist = splited[i+3];
                         user_fromlist = manager.getUser(name_fromlist);
                         if (user_fromlist.alreadyInFollowers(username)) {
                             user_fromlist.removeFollower(username);
@@ -109,10 +108,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 if (counter == 0) {
                     connections.send(connectionId, "11 4");
                 } else {
-                    output = "10 4 " + counter;
+                    output = "10 4 " + counter + " ";
                     for (int i = 0; i < counter; i++) {
-                        output += ((LinkedList<String>) names_success).removeFirst();
-                        output += " ";
+                        output += ((LinkedList<String>) names_success).removeFirst() + " ";
                         int size = output.length();
                         output = output.substring(0, size - 1);
                         connections.send(connectionId, output);

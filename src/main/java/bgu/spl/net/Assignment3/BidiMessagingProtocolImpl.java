@@ -67,7 +67,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 connections.send(connectionId, "11 3");
         } else if (opNum == 4) { //FOLLOW
             int counter = 0;
-            List<String> names_success = new LinkedList<>();
+            LinkedList<String> names_success = new LinkedList<>();
             String output;
             String username = manager.getUserName(connectionId);
             if (username==null) { //ERROR
@@ -78,7 +78,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 User user_fromlist;
                 String f_o = splited[1];
                 int num_users_to_follow = Integer.parseInt(splited[2]);
-
                 if (f_o.equals("0")) //FOLLOW
                 {
                     for (int i = 0; i < num_users_to_follow; i++) {
@@ -88,7 +87,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                             user_fromlist.addFollower(username);
                             user.incrementFollowing();
                             counter++;
-                            ((LinkedList<String>) names_success).addLast(name_fromlist);
+                            names_success.addLast(name_fromlist);
                         }
                     }
                 }
@@ -101,20 +100,20 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                             user_fromlist.removeFollower(username);
                             user.decrementFollowing();
                             counter++;
-                            ((LinkedList<String>) names_success).addLast(name_fromlist);
+                            names_success.addLast(name_fromlist);
                         }
                     }
                 }
                 if (counter == 0) {
                     connections.send(connectionId, "11 4");
                 } else {
-                    output = "10 4 " + counter + " ";
+                    output = "10 4 " + counter;
                     for (int i = 0; i < counter; i++) {
-                        output += ((LinkedList<String>) names_success).removeFirst() + " ";
-                        int size = output.length();
-                        output = output.substring(0, size - 1);
-                        connections.send(connectionId, output);
+                        output += " " + names_success.removeFirst();
                     }
+                    int size = output.length();
+                    System.out.println("output: " + output);
+                    connections.send(connectionId, output);
                 }
             }
         } else if (opNum == 5) {

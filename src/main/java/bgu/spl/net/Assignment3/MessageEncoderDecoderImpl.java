@@ -1,8 +1,10 @@
 package bgu.spl.net.Assignment3;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Vector;
 
 public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> {
 
@@ -172,7 +174,8 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
 
 
     public byte[] encode(String message) {
-        String[] split = message.split("\\s+");
+        System.out.println("encode: " + message);
+        String[] split = message.split(" ");
         String type=split[0];
         switch (type) {
             case "10": //ACK
@@ -274,26 +277,37 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     private byte[] FollowRegisterUserList(String[] split,byte[]type_byte, byte[]opcode_request_byte) {
         int num_users=Integer.parseInt(split[2]);
         byte[]num_users_byte=shortToBytes((short)num_users);
-        byte[]names_list= new byte[1024];
+        ArrayList<Byte> names_list= new ArrayList<>();
+        names_list.add(type_byte[0]);
+        names_list.add(type_byte[1]);
+        names_list.add(opcode_request_byte[0]);
+        names_list.add(opcode_request_byte[1]);
+        names_list.add(num_users_byte[0]);
+        names_list.add(num_users_byte[1]);
+
         String user_name;
+        byte zero = '\0';
+        Byte zeroObject = zero;
         byte[] username_byte;
         int count=0;
         for(int i=3;i<split.length;i++)
         {
             user_name=split[i];
-            username_byte=(user_name+'\0').getBytes();//uses utf8 by default
+            username_byte=(user_name).getBytes();//uses utf8 by default
             for(int j=0;j<username_byte.length;j++){
-                if(count+1>names_list.length){
-                    names_list = Arrays.copyOf(names_list, len * 2);
-                }
-                names_list[count]=username_byte[j];
-                count++;
+                names_list.add(username_byte[j]);
             }
+            names_list.add(zeroObject);
         }
-        byte[]ack_follow= DefaultConvert(type_byte,opcode_request_byte);
-        byte[]ack_follow_num=DefaultConvert(ack_follow,num_users_byte);
-        byte[]ack_foolow_num_users=DefaultConvert(ack_follow_num,names_list);
-        return ack_foolow_num_users;
+//        byte[]ack_follow= DefaultConvert(type_byte,opcode_request_byte);
+//        byte[]ack_follow_num=DefaultConvert(ack_follow,num_users_byte);
+//        byte[]ack_foolow_num_users=DefaultConvert(ack_follow_num,names_list);
+        int size = names_list.size();
+        byte[] output = new byte[size];
+        for (int i = 0; i < size; i++) {
+            output[i] = names_list.get(i).byteValue();
+        }
+        return output;
     }
 
 

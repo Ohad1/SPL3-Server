@@ -321,6 +321,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         byte[]ack_stat_posts=DefaultConvert(ack_stat,num_post_byte);
         byte[]ack_stat_posts_followers=DefaultConvert(ack_stat_posts,num_followers_byte);
         byte[]fin=DefaultConvert(ack_stat_posts_followers,num_following_byte);
+        System.out.println(fin.length);
         return  fin;
     }
 

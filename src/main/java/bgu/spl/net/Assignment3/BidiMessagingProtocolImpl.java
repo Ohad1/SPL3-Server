@@ -58,13 +58,17 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             }
         } else if (opNum == 3) {//LOGOUT
             String username = manager.getUserName(connectionId);
-            User user = manager.getUser(username);
-            if (user.getLoggedin()) { // connect
-                user.setLoggedin(false);
-                manager.removeFromConidName(connectionId);
-                connections.send(connectionId, "10 3");// ACK LOGOUT
-            } else // not connect=ERROR
+            if (username==null) { //ERROR
                 connections.send(connectionId, "11 3");
+            } else {
+                User user = manager.getUser(username);
+                if (user.getLoggedin()) { // connect
+                    user.setLoggedin(false);
+                    manager.removeFromConidName(connectionId);
+                    connections.send(connectionId, "10 3");// ACK LOGOUT
+                } else // not connect=ERROR
+                    connections.send(connectionId, "11 3");
+            }
         } else if (opNum == 4) { //FOLLOW
             int counter = 0;
             LinkedList<String> names_success = new LinkedList<>();
@@ -119,11 +123,10 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         } else if (opNum == 5) {
             String username = manager.getUserName(connectionId);
             if (username==null) { //ERROR
-                connections.send(connectionId, "11 4");
+                connections.send(connectionId, "11 5");
             }
             else {
                 String content = message.substring(2);
-                System.out.println("conect " + content);
                 String[] splitedContent = content.split( " ");
                 LinkedList<String> tagged = new LinkedList<>();
                 for (String string : splitedContent) {
@@ -215,11 +218,16 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 connections.send(connectionId, output);
             }
         } else if (opNum == 8) {
-            String output = "10 8 ";
-            String username = splited[1];
-            User user = manager.getUser(username);
-            output += user.getNumOfPosts() + " " + user.getNumOfFollowers() + " " + user.getNumOfFollowing();
-            connections.send(connectionId, output);
+            String connectedUser = manager.getUserName(connectionId);
+            if (connectedUser==null) { //ERROR
+                connections.send(connectionId, "11 8");
+            } else {
+                String output = "10 8 ";
+                String username = splited[1];
+                User user = manager.getUser(username);
+                output += user.getNumOfPosts() + " " + user.getNumOfFollowers() + " " + user.getNumOfFollowing();
+                connections.send(connectionId, output);
+            }
         }
     }
 

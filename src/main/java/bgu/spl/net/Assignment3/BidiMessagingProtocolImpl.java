@@ -159,8 +159,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     String content = "";
                     String output = "";
                     for (int i = 2; i < splited.length; i++) {
-                        content += splited[i];
+                        content += splited[i]+ " ";
                     }
+                    content = content.substring(0, content.length()-1);
                     User user_to_send = manager.getUser(name);
                     if (user_to_send != null) {
                         if (user_to_send.getLoggedin()) // login
@@ -199,15 +200,20 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             }
         }
         else if (opNum == 7) {
-            String output = "10 7 ";
-            List<String> registeredUsers = manager.getRegisteredUsers();
-            output += registeredUsers.size() + " ";
-            for (String user : registeredUsers) {
-                output += user + " ";
+            String username = manager.getUserName(connectionId);
+            if (username==null) { //ERROR
+                connections.send(connectionId, "11 7");
+            } else {
+                String output = "10 7 ";
+                List<String> registeredUsers = manager.getRegisteredUsers();
+                output += registeredUsers.size() + " ";
+                for (String user : registeredUsers) {
+                    output += user + " ";
+                }
+                output = output.substring(0, output.length() - 1);
+                System.out.println("list: " + output);
+                connections.send(connectionId, output);
             }
-            output = output.substring(0, output.length() - 2);
-            System.out.println("list: " + output);
-            connections.send(connectionId, output);
         } else if (opNum == 8) {
             String output = "10 8 ";
             String username = splited[1];

@@ -40,16 +40,12 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                     return decodeNextByteRegisterLogin(nextByte);
                 case 2:
                     return decodeNextByteRegisterLogin(nextByte);
-                case 3:
-                    return Short.toString(opcode);
                 case 4:
                     return decodeNextByteFollow(nextByte);
                 case 5:
                     return decodeNextBytePostStat(nextByte);
                 case 6:
                     return decodeNextBytePm(nextByte);
-                case 7:
-                    System.out.println("case 7");return Short.toString(opcode);
                 case 8:
                     return decodeNextBytePostStat(nextByte);
             }
@@ -64,6 +60,9 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
             opcode = bytesToShort(opcodeArray);
             output += opcode;
             opcodeCount = 2;
+            if (opcode == 3 | opcode == 7) {
+                return Short.toString(opcode);
+            }
         }
 
         return null;

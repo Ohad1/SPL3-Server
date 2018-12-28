@@ -61,7 +61,9 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
             output += opcode;
             opcodeCount = 2;
             if (opcode == 3 | opcode == 7) {
-                return Short.toString(opcode);
+                String output = Short.toString(opcode);
+                restart();
+                return output;
             }
         }
 

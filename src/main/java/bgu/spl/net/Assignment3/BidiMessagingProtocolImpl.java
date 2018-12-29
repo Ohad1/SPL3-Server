@@ -87,11 +87,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     for (int i = 0; i < num_users_to_follow; i++) {
                         name_fromlist = splited[i+3];
                         user_fromlist = manager.getUser(name_fromlist);
-                        if (!user_fromlist.alreadyInFollowers(username)) {
-                            user_fromlist.addFollower(username);
-                            user.incrementFollowing();
-                            counter++;
-                            names_success.addLast(name_fromlist);
+                        if(user_fromlist!=null) {
+                            if (!user_fromlist.alreadyInFollowers(username)) {
+                                user_fromlist.addFollower(username);
+                                user.incrementFollowing();
+                                counter++;
+                                names_success.addLast(name_fromlist);
+                            }
                         }
                     }
                 }
@@ -225,8 +227,15 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 String output = "10 8 ";
                 String username = splited[1];
                 User user = manager.getUser(username);
-                output += user.getNumOfPosts() + " " + user.getNumOfFollowers() + " " + user.getNumOfFollowing();
-                connections.send(connectionId, output);
+                if(user==null) // no user with this name
+                {
+                    connections.send(connectionId, "11 8");
+                }
+                else{
+                    output += user.getNumOfPosts() + " " + user.getNumOfFollowers() + " " + user.getNumOfFollowing();
+                    connections.send(connectionId, output);
+                }
+
             }
         }
     }

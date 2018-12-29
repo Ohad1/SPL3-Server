@@ -1,7 +1,5 @@
 package bgu.spl.net.Assignment3;
 
-import bgu.spl.net.srv.Reactor;
-
 import java.io.Closeable;
 import java.util.function.Supplier;
 

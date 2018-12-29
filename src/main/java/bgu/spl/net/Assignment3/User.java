@@ -54,6 +54,10 @@ public class User {
         }
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     public int getConnId() {
         return ConnId;
     }
@@ -133,10 +137,13 @@ public class User {
     }
 
     public boolean alreadyInFollowers(String username){
-        if(followers.contains(username))
-            return true;
-        else
-            return false;
+        readWriteLockFollowers.readLock().lock();
+        try {
+            return followers.contains(username);
+        }
+        finally {
+            readWriteLockFollowers.readLock().unlock();
+        }
     }
     public LinkedList<String> getUnreadMessages() {
         return unreadMessages;

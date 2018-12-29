@@ -22,7 +22,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
 
     public void process(String message) {
         System.out.println("Message: " + message);
-        System.out.println("My id: " + connectionId);
         String[] splited = message.split(" ");
         int opNum = Integer.parseInt(splited[0]);
         if (opNum == 1) {
@@ -59,79 +58,75 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             }
         } else if (opNum == 3) {//LOGOUT
             String username = manager.getUserName(connectionId);
-            User user = manager.getUser(username);
-            if (user.getLoggedin()) { // connect
-                user.setLoggedin(false);
-                manager.removeFromConidName(connectionId);
-                connections.send(connectionId, "10 3");// ACK LOGOUT
-            } else // not connect=ERROR
+            if (username==null) { //ERROR
                 connections.send(connectionId, "11 3");
-        }
-        else if (opNum == 4) { //FOLLOW
+            } else {
+                User user = manager.getUser(username);
+                if (user.getLoggedin()) { // connect
+                    user.setLoggedin(false);
+                    manager.removeFromConidName(connectionId);
+                    connections.send(connectionId, "10 3");// ACK LOGOUT
+                } else // not connect=ERROR
+                    connections.send(connectionId, "11 3");
+            }
+        } else if (opNum == 4) { //FOLLOW
             int counter = 0;
-            List<String> names_success = new LinkedList<>();
+            LinkedList<String> names_success = new LinkedList<>();
             String output;
             String username = manager.getUserName(connectionId);
             if (username==null) { //ERROR
                 connections.send(connectionId, "11 4");
             } else {
                 User user = manager.getUser(username);
-                if (user.getLoggedin()) {
-                    String name_fromlist;
-                    User user_fromlist;
-                    String f_o = splited[1];
-                    int num_users_to_follow = Integer.parseInt(splited[2]);
-
-                    if (f_o.equals("0")) //FOLLOW
-                    {
-                        for (int i = 3; i < num_users_to_follow; i++) {
-                            name_fromlist = splited[i];
-                            user_fromlist = manager.getUser(name_fromlist);
-                            if (!user_fromlist.alreadyInFollowers(username)) {
-                                user_fromlist.addFollower(username);
-                                user.incrementFollowing();
-                                counter++;
-                                ((LinkedList<String>) names_success).addLast(name_fromlist);
-                            }
-                        }
-                    }
-                    if (f_o.equals("1"))//UNFOLLOW
-                    {
-                        for (int i = 3; i < num_users_to_follow; i++) {
-                            name_fromlist = splited[i];
-                            user_fromlist = manager.getUser(name_fromlist);
-                            if (user_fromlist.alreadyInFollowers(username)) {
-                                user_fromlist.removeFollower(username);
-                                user.decrementFollowing();
-                                counter++;
-                                ((LinkedList<String>) names_success).addLast(name_fromlist);
-                            }
-                        }
-                    }
-                    if (counter == 0) {
-                        connections.send(connectionId, "11 4");
-                    } else {
-                        output = "10 4 " + counter;
-                        for (int i = 0; i < counter; i++) {
-                            output += ((LinkedList<String>) names_success).removeFirst();
-                            output += " ";
-                            int size = output.length();
-                            output = output.substring(0, size - 1);
-                            connections.send(connectionId, output);
+                String name_fromlist;
+                User user_fromlist;
+                String f_o = splited[1];
+                int num_users_to_follow = Integer.parseInt(splited[2]);
+                if (f_o.equals("0")) //FOLLOW
+                {
+                    for (int i = 0; i < num_users_to_follow; i++) {
+                        name_fromlist = splited[i+3];
+                        user_fromlist = manager.getUser(name_fromlist);
+                        if (!user_fromlist.alreadyInFollowers(username)) {
+                            user_fromlist.addFollower(username);
+                            user.incrementFollowing();
+                            counter++;
+                            names_success.addLast(name_fromlist);
                         }
                     }
                 }
-                else{ // user not loggedIn
-                    connections.send(connectionId,"11 4");
+                if (f_o.equals("1"))//UNFOLLOW
+                {
+                    for (int i = 0; i < num_users_to_follow; i++) {
+                        name_fromlist = splited[i+3];
+                        user_fromlist = manager.getUser(name_fromlist);
+                        if (user_fromlist.alreadyInFollowers(username)) {
+                            user_fromlist.removeFollower(username);
+                            user.decrementFollowing();
+                            counter++;
+                            names_success.addLast(name_fromlist);
+                        }
+                    }
+                }
+                if (counter == 0) {
+                    connections.send(connectionId, "11 4");
+                } else {
+                    output = "10 4 " + counter;
+                    for (int i = 0; i < counter; i++) {
+                        output += " " + names_success.removeFirst();
+                    }
+                    int size = output.length();
+                    System.out.println("output: " + output);
+                    connections.send(connectionId, output);
                 }
             }
         } else if (opNum == 5) {
             String username = manager.getUserName(connectionId);
             if (username==null) { //ERROR
-                connections.send(connectionId, "11 4");
+                connections.send(connectionId, "11 5");
             }
             else {
-                String content = splited[1];
+                String content = message.substring(2);
                 String[] splitedContent = content.split( " ");
                 LinkedList<String> tagged = new LinkedList<>();
                 for (String string : splitedContent) {
@@ -148,6 +143,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 for (String reciever : result) {
                     User recieverUser = manager.getUser(reciever);
                     String output = "9 1 " + username + " " + content;
+                    System.out.println("sending to " + recieverUser.getUsername());
                     Boolean isSent = connections.send(recieverUser.getConnId(), output);
                     if (!isSent) {
                         recieverUser.addUnreadMessage(output);
@@ -166,8 +162,9 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     String content = "";
                     String output = "";
                     for (int i = 2; i < splited.length; i++) {
-                        content += splited[i];
+                        content += splited[i]+ " ";
                     }
+                    content = content.substring(0, content.length()-1);
                     User user_to_send = manager.getUser(name);
                     if (user_to_send != null) {
                         if (user_to_send.getLoggedin()) // login
@@ -206,20 +203,31 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             }
         }
         else if (opNum == 7) {
-            String output = "10 7 ";
-            List<String> registeredUsers = manager.getRegisteredUsers();
-            output += registeredUsers.size() + " ";
-            for (String user : registeredUsers) {
-                output += user + " ";
+            String username = manager.getUserName(connectionId);
+            if (username==null) { //ERROR
+                connections.send(connectionId, "11 7");
+            } else {
+                String output = "10 7 ";
+                List<String> registeredUsers = manager.getRegisteredUsers();
+                output += registeredUsers.size() + " ";
+                for (String user : registeredUsers) {
+                    output += user + " ";
+                }
+                output = output.substring(0, output.length() - 1);
+                System.out.println("list: " + output);
+                connections.send(connectionId, output);
             }
-            output = output.substring(0, output.length() - 2);
-            connections.send(connectionId, output);
         } else if (opNum == 8) {
-            String output = "10 8 ";
-            String username = splited[1];
-            User user = manager.getUser(username);
-            output += user.getNumOfPosts() + " " + user.getNumOfFollowers() + " " + user.getNumOfFollowing();
-            connections.send(connectionId, output);
+            String connectedUser = manager.getUserName(connectionId);
+            if (connectedUser==null) { //ERROR
+                connections.send(connectionId, "11 8");
+            } else {
+                String output = "10 8 ";
+                String username = splited[1];
+                User user = manager.getUser(username);
+                output += user.getNumOfPosts() + " " + user.getNumOfFollowers() + " " + user.getNumOfFollowing();
+                connections.send(connectionId, output);
+            }
         }
     }
 

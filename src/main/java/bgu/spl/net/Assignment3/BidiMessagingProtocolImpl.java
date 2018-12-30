@@ -24,14 +24,17 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         System.out.println("Message: " + message);
         String[] splited = message.split(" ");
         int opNum = Integer.parseInt(splited[0]);
-        if (opNum == 1) {
+        if (opNum == 1) { //REGISTER
             String username = splited[1];
             String password = splited[2];
+            String isConnected = manager.getNameFromConId(connectionId);
+            // tried to login a loggedin user
             if (manager.containsUser(username)) {
                 //error
                 connections.send(connectionId, "11 1");
             }
-            else if (manager.containsUser(username) && manager.getUser(username).getLoggedin()) {
+            // connid is already loggedin
+            else if (isConnected!=null) {
                 connections.send(connectionId, "11 1");
             }
             else {
@@ -65,7 +68,10 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 if (user.getLoggedin()) { // connect
                     user.setLoggedin(false);
                     manager.removeFromConidName(connectionId);
-                    connections.send(connectionId, "10 3");// ACK LOGOUT
+                    Boolean sent = connections.send(connectionId, "10 3");// ACK LOGOUT
+                    if (sent) {
+                        connections.disconnect(connectionId);
+                    }
                 } else // not connect=ERROR
                     connections.send(connectionId, "11 3");
             }
@@ -122,7 +128,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     connections.send(connectionId, output);
                 }
             }
-        } else if (opNum == 5) {
+        } else if (opNum == 5) { //POST
             String username = manager.getUserName(connectionId);
             if (username==null) { //ERROR
                 connections.send(connectionId, "11 5");

@@ -1,6 +1,5 @@
 package bgu.spl.net.Assignment3;
 
-import java.rmi.Naming;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,65 +10,84 @@ public class Manager {
     private ConcurrentHashMap<String, User> userNameHashMap;
     private ConcurrentHashMap<Integer, String> conIDNameHashMap;
 
-    private final ReadWriteLock readWriteLock;
+    private final ReadWriteLock usernameHashMapReadWriteLock;
+    private final ReadWriteLock conIDNameHashMapReadWriteLock;
 
     public Manager() {
         this.userNameHashMap = new ConcurrentHashMap<>();
-        this.readWriteLock = new ReentrantReadWriteLock();
+        this.usernameHashMapReadWriteLock = new ReentrantReadWriteLock();
         this.conIDNameHashMap=new ConcurrentHashMap<>();
+        this.conIDNameHashMapReadWriteLock = new ReentrantReadWriteLock();
     }
     public List<String> getRegisteredUsers() {
-        readWriteLock.readLock().lock();
+        usernameHashMapReadWriteLock.readLock().lock();
         try {
             return new ArrayList<>(userNameHashMap.keySet());
         } finally {
-            readWriteLock.readLock().unlock();
+            usernameHashMapReadWriteLock.readLock().unlock();
         }
-    }
-    public ConcurrentHashMap<String, User> getUserNameHashMap() {
-        return userNameHashMap;
-    }
-
-    public ConcurrentHashMap<Integer, String> getConIDNameHashMap() {
-        return conIDNameHashMap;
     }
 
     public String getUserName(int connid){
-        return this.conIDNameHashMap.get(connid);
+        conIDNameHashMapReadWriteLock.readLock().lock();
+        try {
+            return this.conIDNameHashMap.get(connid);
+        } finally {
+            conIDNameHashMapReadWriteLock.readLock().unlock();
+        }
     }
     public Boolean containsUser(String user) {
-        readWriteLock.readLock().lock();
+        usernameHashMapReadWriteLock.readLock().lock();
         try {
             return userNameHashMap.containsKey(user);
         } finally {
-            readWriteLock.readLock().unlock();
+            usernameHashMapReadWriteLock.readLock().unlock();
         }
     }
 
+    public String getNameFromConId(int conid) {
+        conIDNameHashMapReadWriteLock.readLock().lock();
+        try {
+            return conIDNameHashMap.get(conid);
+        } finally {
+            conIDNameHashMapReadWriteLock.readLock().unlock();
+        }
+    }
 
     public void addConidName(int conid,String name) {
-        this.conIDNameHashMap.put(conid,name);
+        conIDNameHashMapReadWriteLock.writeLock().lock();
+        try {
+            this.conIDNameHashMap.put(conid,name);
+        } finally {
+            conIDNameHashMapReadWriteLock.writeLock().unlock();
+        }
     }
+
     public void removeFromConidName(int conid) {
-        this.conIDNameHashMap.remove(conid);
+        conIDNameHashMapReadWriteLock.writeLock().lock();
+        try {
+            this.conIDNameHashMap.remove(conid);
+        } finally {
+            conIDNameHashMapReadWriteLock.writeLock().unlock();
+        }
     }
 
 
     public User getUser(String user) {
-        readWriteLock.readLock().lock();
+        usernameHashMapReadWriteLock.readLock().lock();
         try {
             return userNameHashMap.get(user);
         } finally {
-            readWriteLock.readLock().unlock();
+            usernameHashMapReadWriteLock.readLock().unlock();
         }
     }
 
     public void addUserToMap(String name, String password) {
-        readWriteLock.writeLock().lock();
+        usernameHashMapReadWriteLock.writeLock().lock();
         try {
             userNameHashMap.put(name, new User(name, password));
         } finally {
-            readWriteLock.writeLock().unlock();
+            usernameHashMapReadWriteLock.writeLock().unlock();
         }
     }
 }

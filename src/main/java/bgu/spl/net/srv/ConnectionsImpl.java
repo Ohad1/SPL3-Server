@@ -21,12 +21,20 @@ public class ConnectionsImpl<T> implements Connections<T> {
     }
 
     public boolean send(int connectionId, T msg) {
-        if (!connectionHandlerConcurrentHashMap.containsKey(connectionId)) {
-            return false;
+        readWriteLock.readLock().lock();
+        try {
+            if (!connectionHandlerConcurrentHashMap.containsKey(connectionId)) {
+                return false;
+            }
+            bgu.spl.net.Assignment3.ConnectionHandler connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
+            synchronized (connectionHandler) {
+                connectionHandler.send(msg);
+            }
+            return true;
+        } finally {
+            readWriteLock.readLock().unlock();
         }
-        bgu.spl.net.Assignment3.ConnectionHandler connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
-        connectionHandler.send(msg);
-        return true;
+
     }
 
     public void broadcast(T msg) {
@@ -41,7 +49,12 @@ public class ConnectionsImpl<T> implements Connections<T> {
     }
 
     public void disconnect(int connectionId) {
-
+        readWriteLock.writeLock().lock();
+        try {
+            connectionHandlerConcurrentHashMap.remove(connectionId);
+        } finally {
+            readWriteLock.writeLock().unlock();
+        }
     }
 
     public int add(ConnectionHandler connectionHandler) {

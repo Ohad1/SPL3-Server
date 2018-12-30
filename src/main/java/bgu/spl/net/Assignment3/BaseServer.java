@@ -44,7 +44,7 @@ public abstract class BaseServer<T> implements Server<T> {
                         encdecFactory.get(),
                         protocol);
                 int connectionId = connections.add(handler);
-                System.out.println("base connid: " + connectionId);
+//                System.out.println("base connid: " + connectionId);
                 protocol.start(connectionId, connections);
                 execute(handler);
             }

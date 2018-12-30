@@ -5,6 +5,7 @@ import bgu.spl.net.Assignment3.MessageEncoderDecoder;
 import bgu.spl.net.Assignment3.NonBlockingConnectionHandler;
 import bgu.spl.net.Assignment3.Server;
 import bgu.spl.net.srv.ActorThreadPool;
+import bgu.spl.net.srv.ConnectionsImpl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -23,6 +24,7 @@ public class Reactor<T> implements Server<T> {
     private final Supplier<MessageEncoderDecoder<T>> readerFactory;
     private final ActorThreadPool pool;
     private Selector selector;
+    private ConnectionsImpl connections;
 
     private Thread selectorThread;
     private final ConcurrentLinkedQueue<Runnable> selectorTasks = new ConcurrentLinkedQueue<>();
@@ -37,6 +39,7 @@ public class Reactor<T> implements Server<T> {
         this.port = port;
         this.protocolFactory = protocolFactory;
         this.readerFactory = readerFactory;
+        this.connections = new ConnectionsImpl();
     }
 
     @Override
@@ -99,12 +102,16 @@ public class Reactor<T> implements Server<T> {
     private void handleAccept(ServerSocketChannel serverChan, Selector selector) throws IOException {
         SocketChannel clientChan = serverChan.accept();
         clientChan.configureBlocking(false);
+        BidiMessagingProtocol<T> protocol=  protocolFactory.get();
         final NonBlockingConnectionHandler<T> handler = new NonBlockingConnectionHandler<>(
                 readerFactory.get(),
-                protocolFactory.get(),
+                protocol,
                 clientChan,
                 this);
+        int connectionId = connections.add(handler);
+        protocol.start(connectionId, connections);
         clientChan.register(selector, SelectionKey.OP_READ, handler);
+
     }
 
     private void handleReadWrite(SelectionKey key) {

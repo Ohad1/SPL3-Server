@@ -116,8 +116,4 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
 
     }
 
-    @Override
-    public void run() { //TODO CHECK
-        continueRead().run();
-    }
 }

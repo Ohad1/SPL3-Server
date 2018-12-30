@@ -58,6 +58,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 for (String mess : user.getUnreadMessages()) {
                     connections.send(connectionId, mess);
                 }
+                user.getUnreadMessages().clear();
             }
         } else if (opNum == 3) {//LOGOUT
             String username = manager.getUserName(connectionId);

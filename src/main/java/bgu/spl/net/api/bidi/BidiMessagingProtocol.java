@@ -1,4 +1,4 @@
-package bgu.spl.net.Assignment3;
+package bgu.spl.net.api.bidi;
 
 public interface BidiMessagingProtocol<T>  {
 	/**

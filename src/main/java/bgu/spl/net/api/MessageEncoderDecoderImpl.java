@@ -1,14 +1,12 @@
-package bgu.spl.net.Assignment3;
+package bgu.spl.net.api;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Vector;
 
 public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> {
 
-    private byte[] bytes = new byte[1024]; //start with 1k TODO CHANGE
+    private byte[] bytes = new byte[1024];
     private int len = 0;
     private int opcodeCount = 0;
     private String output = "";
@@ -16,9 +14,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     private byte[] opcodeArray = new byte[2];
 
     private int numOfZeros = 0;
-    private int followByte = -1;
-    private HashMap<String,Short> types_codeMap;
-
     private byte[] numOfUsersArray = new byte[2];
     private int countNum = 0;
     private short numOfUsers;
@@ -215,8 +210,13 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     }
 
     private byte[] Notification(String[]split,String line, byte[] type_byte) {
-
-        byte[]pm_post=(split[1]).getBytes();//TODO CHECK CHAR
+        byte[]pm_post = new byte[1];
+        if (split[1].equals("0")) {
+            pm_post[0] = '\0';
+        }
+        else {
+            pm_post[0] = '\1';
+        }
         byte[]posting_user=(split[2]+'\0').getBytes();
         String s="";
         for(int i=3;i<split.length;i++){

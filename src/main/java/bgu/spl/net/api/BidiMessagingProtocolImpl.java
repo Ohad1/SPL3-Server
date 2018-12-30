@@ -1,4 +1,9 @@
-package bgu.spl.net.Assignment3;
+package bgu.spl.net.api;
+
+import bgu.spl.net.Assignment3.Manager;
+import bgu.spl.net.Assignment3.User;
+import bgu.spl.net.api.bidi.BidiMessagingProtocol;
+import bgu.spl.net.api.bidi.Connections;
 
 import java.util.LinkedHashSet;
 import java.util.LinkedList;

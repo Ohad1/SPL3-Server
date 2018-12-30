@@ -1,11 +1,7 @@
-package bgu.spl.net.Assignment3;
+package bgu.spl.net.srv;
 
-import bgu.spl.net.Assignment3.BidiMessagingProtocol;
-import bgu.spl.net.Assignment3.MessageEncoderDecoder;
-import bgu.spl.net.Assignment3.NonBlockingConnectionHandler;
-import bgu.spl.net.Assignment3.Server;
-import bgu.spl.net.srv.ActorThreadPool;
-import bgu.spl.net.srv.ConnectionsImpl;
+import bgu.spl.net.api.MessageEncoderDecoder;
+import bgu.spl.net.api.bidi.BidiMessagingProtocol;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

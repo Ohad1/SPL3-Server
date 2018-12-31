@@ -45,7 +45,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             }
             else {
                 //success
-                manager.addUserToMap(username, password);
+                manager.addUser(username, password);
                 connections.send(connectionId, "10 1");
             }
         } else if (opNum == 2) { //LOGIN
@@ -146,8 +146,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 String[] splitedContent = content.split( " ");
                 LinkedList<String> tagged = new LinkedList<>();
                 for (String string : splitedContent) {
-                    if (string.charAt(0) == '@') {
-                        tagged.add(string.substring(1));
+                    if (string.contains("@")) {
+                        tagged.add(string.substring(string.indexOf('@')+1));
                     }
                 }
                 User sendingUser = manager.getUser(username);

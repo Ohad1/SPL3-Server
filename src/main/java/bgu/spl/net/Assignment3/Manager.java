@@ -3,28 +3,32 @@ package bgu.spl.net.Assignment3;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Manager {
     private ConcurrentHashMap<String, User> userNameHashMap;
     private ConcurrentHashMap<Integer, String> conIDNameHashMap;
-
+    private ConcurrentLinkedQueue<String> registeredUsers;
     private final ReadWriteLock usernameHashMapReadWriteLock;
     private final ReadWriteLock conIDNameHashMapReadWriteLock;
+    private final ReadWriteLock registeredUsersReadWriteLock;
 
     public Manager() {
         this.userNameHashMap = new ConcurrentHashMap<>();
-        this.usernameHashMapReadWriteLock = new ReentrantReadWriteLock();
         this.conIDNameHashMap=new ConcurrentHashMap<>();
+        this.registeredUsers = new ConcurrentLinkedQueue<>();
+        this.usernameHashMapReadWriteLock = new ReentrantReadWriteLock();
         this.conIDNameHashMapReadWriteLock = new ReentrantReadWriteLock();
+        this.registeredUsersReadWriteLock = new ReentrantReadWriteLock();
     }
     public List<String> getRegisteredUsers() {
-        usernameHashMapReadWriteLock.readLock().lock();
+        registeredUsersReadWriteLock.readLock().lock();
         try {
-            return new ArrayList<>(userNameHashMap.keySet());
+            return new ArrayList<>(registeredUsers);
         } finally {
-            usernameHashMapReadWriteLock.readLock().unlock();
+            registeredUsersReadWriteLock.readLock().unlock();
         }
     }
 
@@ -82,12 +86,18 @@ public class Manager {
         }
     }
 
-    public void addUserToMap(String name, String password) {
+    public void addUser(String name, String password) {
         usernameHashMapReadWriteLock.writeLock().lock();
         try {
             userNameHashMap.put(name, new User(name, password));
         } finally {
             usernameHashMapReadWriteLock.writeLock().unlock();
+        }
+        registeredUsersReadWriteLock.writeLock().lock();
+        try {
+            registeredUsers.add(name);
+        } finally {
+            registeredUsersReadWriteLock.writeLock().unlock();
         }
     }
 }

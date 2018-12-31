@@ -27,6 +27,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
 
     public void process(String message) {
         System.out.println("Message: " + message);
+        connections.broadcast("hhkjh");
         String[] splited = message.split(" ");
         int opNum = Integer.parseInt(splited[0]);
         if (opNum == 1) { //REGISTER
@@ -77,6 +78,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     Boolean sent = connections.send(connectionId, "10 3");// ACK LOGOUT
                     if (sent) {
                         connections.disconnect(connectionId);
+                        shouldTerminate = true;
                     }
                 } else // not connect=ERROR
                     connections.send(connectionId, "11 3");

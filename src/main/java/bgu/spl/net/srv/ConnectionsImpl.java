@@ -2,6 +2,7 @@ package bgu.spl.net.srv;
 
 import bgu.spl.net.api.bidi.Connections;
 
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -39,9 +40,10 @@ public class ConnectionsImpl<T> implements Connections<T> {
     public void broadcast(T msg) {
         readWriteLock.readLock().lock();
         try {
-            for (ConnectionHandler connectionHandler : connectionHandlerConcurrentHashMap.values()) {
-                connectionHandler.send(msg);
-            }
+//            for (ConnectionHandler connectionHandler : connectionHandlerConcurrentHashMap.values()) {
+//                connectionHandler.send(msg);
+//            }
+            System.out.println("Size: " + size());
         } finally {
             readWriteLock.readLock().unlock();
         }
@@ -50,12 +52,21 @@ public class ConnectionsImpl<T> implements Connections<T> {
     public void disconnect(int connectionId) {
         readWriteLock.writeLock().lock();
         try {
+//            ConnectionHandler connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
             connectionHandlerConcurrentHashMap.remove(connectionId);
+//        } catch (IOException e) {
+//            e.printStackTrace();
         } finally {
             readWriteLock.writeLock().unlock();
         }
     }
+    public int size(){
+        readWriteLock.readLock().lock();
+            int g = connectionHandlerConcurrentHashMap.size();
+        readWriteLock.readLock().unlock();
 
+        return g;
+    }
     public int add(ConnectionHandler connectionHandler) {
         readWriteLock.writeLock().lock();
         try {

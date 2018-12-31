@@ -33,37 +33,44 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             String username = splited[1];
             String password = splited[2];
             String isConnected = manager.getNameFromConId(connectionId);
-            // tried to login a loggedin user
-            if (manager.containsUser(username)) {
+            // connid is already loggedin
+            if (isConnected!=null) {
                 //error
                 connections.send(connectionId, "11 1");
             }
-            // connid is already loggedin
-            else if (isConnected!=null) {
+            // prevent login to the same user from two computers
+            Boolean isPut = manager.putIfAbsenct(username, password);
+            // fail
+            if (!isPut) {
                 connections.send(connectionId, "11 1");
             }
             else {
                 //success
-                manager.addUser(username, password);
                 connections.send(connectionId, "10 1");
             }
         } else if (opNum == 2) { //LOGIN
             String username = splited[1];
             String password = splited[2];
-            if (!manager.containsUser(username) ||
-                    manager.getUser(username).getLoggedin() ||
-                    !manager.getUser(username).getPassword().equals(password)) {
+            if (!manager.containsUser(username) ) {
                 connections.send(connectionId, "11 2");
-            } else {
-                manager.addConidName(connectionId, username);
-                User user = manager.getUser(username);
-                user.setLoggedin(true);
-                user.setConnId(connectionId);
-                connections.send(connectionId, "10 2");
-                for (String mess : user.getUnreadMessages()) {
-                    connections.send(connectionId, mess);
+            }
+            else {
+                synchronized (manager.getUser(username)) {
+                    if (manager.getUser(username).getLoggedin() ||
+                            !manager.getUser(username).getPassword().equals(password)) {
+                        connections.send(connectionId, "11 2");
+                    } else {
+                        manager.addConidName(connectionId, username);
+                        User user = manager.getUser(username);
+                        user.setLoggedin(true);
+                        user.setConnId(connectionId);
+                        connections.send(connectionId, "10 2");
+                        for (String mess : user.getUnreadMessages()) {
+                            connections.send(connectionId, mess);
+                        }
+                        user.getUnreadMessages().clear();
+                    }
                 }
-                user.getUnreadMessages().clear();
             }
         } else if (opNum == 3) {//LOGOUT
             String username = manager.getUserName(connectionId);

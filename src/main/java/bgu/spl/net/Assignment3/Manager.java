@@ -40,12 +40,31 @@ public class Manager {
             conIDNameHashMapReadWriteLock.readLock().unlock();
         }
     }
+
     public Boolean containsUser(String user) {
         usernameHashMapReadWriteLock.readLock().lock();
         try {
             return userNameHashMap.containsKey(user);
         } finally {
             usernameHashMapReadWriteLock.readLock().unlock();
+        }
+    }
+
+    public Boolean putIfAbsenct(String name, String password) {
+        usernameHashMapReadWriteLock.writeLock().lock();
+        try {
+            User output = userNameHashMap.putIfAbsent(name, new User(name, password));
+            if (output==null) {
+                registeredUsersReadWriteLock.writeLock().lock();
+                try {
+                    registeredUsers.add(name);
+                } finally {
+                    registeredUsersReadWriteLock.writeLock().unlock();
+                }
+            }
+            return output == null;
+        } finally {
+            usernameHashMapReadWriteLock.writeLock().unlock();
         }
     }
 
@@ -86,18 +105,12 @@ public class Manager {
         }
     }
 
-    public void addUser(String name, String password) {
-        usernameHashMapReadWriteLock.writeLock().lock();
-        try {
-            userNameHashMap.put(name, new User(name, password));
-        } finally {
-            usernameHashMapReadWriteLock.writeLock().unlock();
-        }
-        registeredUsersReadWriteLock.writeLock().lock();
-        try {
-            registeredUsers.add(name);
-        } finally {
-            registeredUsersReadWriteLock.writeLock().unlock();
-        }
-    }
+//    public void addUser(String name, String password) {
+//        usernameHashMapReadWriteLock.writeLock().lock();
+//        try {
+//            userNameHashMap.put(name, new User(name, password));
+//        } finally {
+//            usernameHashMapReadWriteLock.writeLock().unlock();
+//        }
+//    }
 }

@@ -11,7 +11,7 @@ public class TCPMain {
     public static void main(String[] args) throws IOException {
         Manager manager = new Manager();
         Server.threadPerClient(
-                7777, //port
+                Integer.parseInt(args[1]), //port
                 () -> new BidiMessagingProtocolImpl(manager), //protocol factory
                 MessageEncoderDecoderImpl::new //message encoder decoder factory
         ).serve();

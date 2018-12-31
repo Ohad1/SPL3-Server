@@ -1,17 +1,32 @@
 package bgu.spl.net.impl.echo;
 
-import bgu.spl.net.api.MessagingProtocol;
+import bgu.spl.net.api.bidi.BidiMessagingProtocol;
+import bgu.spl.net.api.bidi.Connections;
+import bgu.spl.net.srv.ConnectionsImpl;
+
 import java.time.LocalDateTime;
 
-public class EchoProtocol implements MessagingProtocol<String> {
+public class EchoProtocol implements BidiMessagingProtocol<String> {
 
     private boolean shouldTerminate = false;
+    private int id;
+    private ConnectionsImpl<String> connections;
 
     @Override
-    public String process(String msg) {
+    public void start(int connectionId, Connections<String> connections) {
+        this.id = connectionId;
+        this.connections = (ConnectionsImpl<String>)connections;
+        System.out.println("id: " + id + " connected succesfully");
+    }
+
+
+    @Override
+    public void process(String msg) {
         shouldTerminate = "bye".equals(msg);
-        System.out.println("[" + LocalDateTime.now() + "]: " + msg);
-        return createEcho(msg);
+        String answer = createEcho(msg);
+        System.out.println("[" + LocalDateTime.now() + "] got: " + msg+" size: "+connections.size());
+        connections.send(id, answer);
+        if (shouldTerminate) connections.disconnect(id);
     }
 
     private String createEcho(String message) {
@@ -23,4 +38,5 @@ public class EchoProtocol implements MessagingProtocol<String> {
     public boolean shouldTerminate() {
         return shouldTerminate;
     }
+
 }

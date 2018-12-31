@@ -26,7 +26,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
     }
 
     public void process(String message) {
-        System.out.println("Message: " + message);
         connections.broadcast("hhkjh");
         String[] splited = message.split(" ");
         int opNum = Integer.parseInt(splited[0]);
@@ -116,11 +115,13 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     for (int i = 0; i < num_users_to_follow; i++) {
                         name_fromlist = splited[i+3];
                         user_fromlist = manager.getUser(name_fromlist);
-                        if (user_fromlist.alreadyInFollowers(username)) {
-                            user_fromlist.removeFollower(username);
-                            user.decrementFollowing();
-                            counter++;
-                            names_success.addLast(name_fromlist);
+                        synchronized (user_fromlist.getFollowers()) {
+                            if (user_fromlist.alreadyInFollowers(username)) {
+                                user_fromlist.removeFollower(username);
+                                user.decrementFollowing();
+                                counter++;
+                                names_success.addLast(name_fromlist);
+                            }
                         }
                     }
                 }
@@ -132,7 +133,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                         output += " " + names_success.removeFirst();
                     }
                     int size = output.length();
-                    System.out.println("output: " + output);
                     connections.send(connectionId, output);
                 }
             }
@@ -151,22 +151,24 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     }
                 }
                 User sendingUser = manager.getUser(username);
-                LinkedList<String> followers = sendingUser.getFollowers();
-                LinkedList<String> all = new LinkedList<>();
-                all.addAll(tagged);
-                all.addAll(followers);
-                LinkedList<String> result = new LinkedList(new LinkedHashSet(all));
-                for (String reciever : result) {
-                    User recieverUser = manager.getUser(reciever);
-                    String output = "9 1 " + username + " " + content;
-                    System.out.println("sending to " + recieverUser.getUsername());
-                    Boolean isSent = connections.send(recieverUser.getConnId(), output);
-                    if (!isSent) {
-                        recieverUser.addUnreadMessage(output);
+                synchronized (sendingUser.getFollowers()) {
+                    LinkedList<String> followers = new LinkedList<>();
+                    followers.addAll(sendingUser.getFollowers());
+                    LinkedList<String> all = new LinkedList<>();
+                    all.addAll(tagged);
+                    all.addAll(followers);
+                    LinkedList<String> result = new LinkedList(new LinkedHashSet(all));
+                    for (String reciever : result) {
+                        User recieverUser = manager.getUser(reciever);
+                        String output = "9 1 " + username + " " + content;
+                        Boolean isSent = connections.send(recieverUser.getConnId(), output);
+                        if (!isSent) {
+                            recieverUser.addUnreadMessage(output);
+                        }
                     }
+                    sendingUser.addPost(content);
+                    connections.send(connectionId, "10 5");
                 }
-                sendingUser.addPost(content);
-                connections.send(connectionId, "10 5");
             }
         }
         else if (opNum == 6) { //PM
@@ -230,7 +232,6 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     output += user + " ";
                 }
                 output = output.substring(0, output.length() - 1);
-                System.out.println("list: " + output);
                 connections.send(connectionId, output);
             }
         } else if (opNum == 8) {

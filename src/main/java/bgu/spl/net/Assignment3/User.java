@@ -20,6 +20,8 @@ public class User {
     private final ReadWriteLock readWriteLockPosts;
     private final ReadWriteLock readWriteLockFollowers;
 
+
+
     public User(String username, String password) {
         this.username = username;
         this.password = password;
@@ -34,6 +36,10 @@ public class User {
         this.readWriteLockFollowers = new ReentrantReadWriteLock();
     }
 
+    public ReadWriteLock getReadWriteLockFollowers() {
+        return readWriteLockFollowers;
+    }
+
     public Boolean getLoggedin() {
         return isLoggedin;
     }
@@ -42,12 +48,10 @@ public class User {
         isLoggedin = loggedin;
     }
 
-    public LinkedList<String> getFollowers() {
-        LinkedList<String> output = new LinkedList<>();
+    public ConcurrentLinkedQueue<String> getFollowers() {
         readWriteLockFollowers.readLock().lock();
         try {
-            output.addAll(followers);
-            return output;
+            return followers;
         }
         finally {
             readWriteLockFollowers.readLock().unlock();

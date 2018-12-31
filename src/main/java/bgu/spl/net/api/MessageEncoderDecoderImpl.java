@@ -134,7 +134,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         }
         if (nextByte == '\0') {
             String content = new String(bytes, 0, len, StandardCharsets.UTF_8);
-            System.out.println(content);
             output += " " + content;
             String result = output;
             restart();
@@ -170,7 +169,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
 
 
     public byte[] encode(String message) {
-        System.out.println("encode: " + message);
         String[] split = message.split(" ");
         String type=split[0];
         switch (type) {
@@ -323,7 +321,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         byte[]ack_stat_posts=DefaultConvert(ack_stat,num_post_byte);
         byte[]ack_stat_posts_followers=DefaultConvert(ack_stat_posts,num_followers_byte);
         byte[]fin=DefaultConvert(ack_stat_posts_followers,num_following_byte);
-        System.out.println(fin.length);
         return  fin;
     }
 

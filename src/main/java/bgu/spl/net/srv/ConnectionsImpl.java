@@ -21,15 +21,23 @@ public class ConnectionsImpl<T> implements Connections<T> {
     }
 
     public boolean send(int connectionId, T msg) {
+        // prevent writing in disconnect and add
         readWriteLock.readLock().lock();
         try {
             if (!connectionHandlerConcurrentHashMap.containsKey(connectionId)) {
                 return false;
             }
+
             ConnectionHandler connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
-            synchronized (connectionHandler) {
-                connectionHandler.send(msg);
-            }
+            // todo check need to check if is null
+//            if (connectionHandler!=null) {
+                // not to send in parallel
+                synchronized (connectionHandler) {
+//                    if (connectionHandler!=null) {
+                        connectionHandler.send(msg);
+//                    }
+                }
+//            }
             return true;
         } finally {
             readWriteLock.readLock().unlock();
@@ -52,10 +60,7 @@ public class ConnectionsImpl<T> implements Connections<T> {
     public void disconnect(int connectionId) {
         readWriteLock.writeLock().lock();
         try {
-//            ConnectionHandler connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
             connectionHandlerConcurrentHashMap.remove(connectionId);
-//        } catch (IOException e) {
-//            e.printStackTrace();
         } finally {
             readWriteLock.writeLock().unlock();
         }

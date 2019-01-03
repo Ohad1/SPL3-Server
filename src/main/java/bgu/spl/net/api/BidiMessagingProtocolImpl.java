@@ -56,13 +56,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 connections.send(connectionId, "11 2");
             }
             else {
-                synchronized (manager.getUser(username).getLoggedin()) {
-                    if (manager.getUser(username).getLoggedin() ||
-                            !manager.getUser(username).getPassword().equals(password)) {
+                User user = manager.getUser(username);
+                synchronized (user.getLoggedin()) {
+                    if (user.getLoggedin() || !user.getPassword().equals(password)) {
                         connections.send(connectionId, "11 2");
                     } else {
                         manager.addConidName(connectionId, username);
-                        User user = manager.getUser(username);
                         user.setLoggedin(true);
                         user.setConnId(connectionId);
                         connections.send(connectionId, "10 2");

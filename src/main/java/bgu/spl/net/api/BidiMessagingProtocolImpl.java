@@ -26,12 +26,11 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
     }
 
     public void process(String message) {
-        connections.broadcast("hhkjh");
-        String[] splited = message.split(" ");
-        int opNum = Integer.parseInt(splited[0]);
+        String[] splitted = message.split(" ");
+        int opNum = Integer.parseInt(splitted[0]);
         if (opNum == 1) { //REGISTER
-            String username = splited[1];
-            String password = splited[2];
+            String username = splitted[1];
+            String password = splitted[2];
             String isConnected = manager.getNameFromConId(connectionId);
             // connid is already loggedin
             if (isConnected!=null) {
@@ -50,8 +49,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 connections.send(connectionId, "10 1");
             }
         } else if (opNum == 2) { //LOGIN
-            String username = splited[1];
-            String password = splited[2];
+            String username = splitted[1];
+            String password = splitted[2];
             if (!manager.containsUser(username) ) {
                 connections.send(connectionId, "11 2");
             }
@@ -102,12 +101,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 User user = manager.getUser(username);
                 String name_fromlist;
                 User user_fromlist;
-                String f_o = splited[1];
-                int num_users_to_follow = Integer.parseInt(splited[2]);
+                String f_o = splitted[1];
+                int num_users_to_follow = Integer.parseInt(splitted[2]);
                 if (f_o.equals("0")) //FOLLOW
                 {
                     for (int i = 0; i < num_users_to_follow; i++) {
-                        name_fromlist = splited[i+3];
+                        name_fromlist = splitted[i+3];
                         user_fromlist = manager.getUser(name_fromlist);
                         if(user_fromlist!=null) {
                             if (!user_fromlist.alreadyInFollowers(username)) {
@@ -122,7 +121,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 if (f_o.equals("1"))//UNFOLLOW
                 {
                     for (int i = 0; i < num_users_to_follow; i++) {
-                        name_fromlist = splited[i+3];
+                        name_fromlist = splitted[i+3];
                         user_fromlist = manager.getUser(name_fromlist);
                         if (user_fromlist.alreadyInFollowers(username)) {
                             user_fromlist.removeFollower(username);
@@ -183,15 +182,15 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             }
         }
         else if (opNum == 6) { //PM
-            String name = splited[1];
+            String name = splitted[1];
             String user_name = manager.getUserName(connectionId);
             if (user_name != null) {
                 User user = manager.getUser(user_name);
                 if (user.getLoggedin()) {
                     String content = "";
                     String output = "";
-                    for (int i = 2; i < splited.length; i++) {
-                        content += splited[i]+ " ";
+                    for (int i = 2; i < splitted.length; i++) {
+                        content += splitted[i]+ " ";
                     }
                     content = content.substring(0, content.length()-1);
                     User user_to_send = manager.getUser(name);
@@ -251,7 +250,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 connections.send(connectionId, "11 8");
             } else {
                 String output = "10 8 ";
-                String username = splited[1];
+                String username = splitted[1];
                 User user = manager.getUser(username);
                 if(user==null) // no user with this name
                 {

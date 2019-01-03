@@ -11,98 +11,46 @@ public class Manager {
     private ConcurrentHashMap<String, User> userNameHashMap;
     private ConcurrentHashMap<Integer, String> conIDNameHashMap;
     private ConcurrentLinkedQueue<String> registeredUsers;
-    private final ReadWriteLock usernameHashMapReadWriteLock;
-    private final ReadWriteLock conIDNameHashMapReadWriteLock;
-    private final ReadWriteLock registeredUsersReadWriteLock;
 
     public Manager() {
         this.userNameHashMap = new ConcurrentHashMap<>();
         this.conIDNameHashMap=new ConcurrentHashMap<>();
         this.registeredUsers = new ConcurrentLinkedQueue<>();
-        this.usernameHashMapReadWriteLock = new ReentrantReadWriteLock();
-        this.conIDNameHashMapReadWriteLock = new ReentrantReadWriteLock();
-        this.registeredUsersReadWriteLock = new ReentrantReadWriteLock();
     }
     public List<String> getRegisteredUsers() {
-        registeredUsersReadWriteLock.readLock().lock();
-        try {
-            return new ArrayList<>(registeredUsers);
-        } finally {
-            registeredUsersReadWriteLock.readLock().unlock();
-        }
+        return new ArrayList<>(registeredUsers);
     }
 
     public String getUserName(int connid){
-        conIDNameHashMapReadWriteLock.readLock().lock();
-        try {
-            return this.conIDNameHashMap.get(connid);
-        } finally {
-            conIDNameHashMapReadWriteLock.readLock().unlock();
-        }
+        return this.conIDNameHashMap.get(connid);
     }
 
     public Boolean containsUser(String user) {
-        usernameHashMapReadWriteLock.readLock().lock();
-        try {
-            return userNameHashMap.containsKey(user);
-        } finally {
-            usernameHashMapReadWriteLock.readLock().unlock();
-        }
+        return userNameHashMap.containsKey(user);
     }
 
     public Boolean putIfAbsenct(String name, String password) {
-        usernameHashMapReadWriteLock.writeLock().lock();
-        try {
-            User output = userNameHashMap.putIfAbsent(name, new User(name, password));
-            if (output==null) {
-                registeredUsersReadWriteLock.writeLock().lock();
-                try {
-                    registeredUsers.add(name);
-                } finally {
-                    registeredUsersReadWriteLock.writeLock().unlock();
-                }
-            }
-            return output == null;
-        } finally {
-            usernameHashMapReadWriteLock.writeLock().unlock();
+        User output = userNameHashMap.putIfAbsent(name, new User(name, password));
+        if (output==null) {
+                registeredUsers.add(name);
         }
+        return output == null;
     }
 
     public String getNameFromConId(int conid) {
-        conIDNameHashMapReadWriteLock.readLock().lock();
-        try {
-            return conIDNameHashMap.get(conid);
-        } finally {
-            conIDNameHashMapReadWriteLock.readLock().unlock();
-        }
+        return conIDNameHashMap.get(conid);
     }
 
     public void addConidName(int conid,String name) {
-        conIDNameHashMapReadWriteLock.writeLock().lock();
-        try {
-            this.conIDNameHashMap.put(conid,name);
-        } finally {
-            conIDNameHashMapReadWriteLock.writeLock().unlock();
-        }
+        this.conIDNameHashMap.put(conid,name);
     }
 
     public void removeFromConidName(int conid) {
-        conIDNameHashMapReadWriteLock.writeLock().lock();
-        try {
-            this.conIDNameHashMap.remove(conid);
-        } finally {
-            conIDNameHashMapReadWriteLock.writeLock().unlock();
-        }
+        this.conIDNameHashMap.remove(conid);
     }
 
-
     public User getUser(String user) {
-        usernameHashMapReadWriteLock.readLock().lock();
-        try {
-            return userNameHashMap.get(user);
-        } finally {
-            usernameHashMapReadWriteLock.readLock().unlock();
-        }
+        return userNameHashMap.get(user);
     }
 
 //    public void addUser(String name, String password) {

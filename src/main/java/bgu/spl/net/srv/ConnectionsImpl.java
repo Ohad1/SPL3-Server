@@ -12,74 +12,49 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
     ConcurrentHashMap<Integer, ConnectionHandler> connectionHandlerConcurrentHashMap;
     AtomicInteger countId;
-    private ReadWriteLock readWriteLock;
 
     public ConnectionsImpl() {
         this.connectionHandlerConcurrentHashMap = new ConcurrentHashMap<>();
         this.countId = new AtomicInteger(0);
-        this.readWriteLock = new ReentrantReadWriteLock();
     }
 
     public boolean send(int connectionId, T msg) {
         // prevent writing in disconnect and add
-        readWriteLock.readLock().lock();
-        try {
-            if (!connectionHandlerConcurrentHashMap.containsKey(connectionId)) {
-                return false;
-            }
-
-            ConnectionHandler connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
-            // todo check need to check if is null
-//            if (connectionHandler!=null) {
-                // not to send in parallel
-                synchronized (connectionHandler) {
-//                    if (connectionHandler!=null) {
-                        connectionHandler.send(msg);
-//                    }
-                }
-//            }
-            return true;
-        } finally {
-            readWriteLock.readLock().unlock();
+        if (!connectionHandlerConcurrentHashMap.containsKey(connectionId)) {
+            return false;
         }
+
+        ConnectionHandler connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
+        // todo check need to check if is null
+//            if (connectionHandler!=null) {
+            // not to send in parallel
+            synchronized (connectionHandler) {
+//                    if (connectionHandler!=null) {
+                    connectionHandler.send(msg);
+//                    }
+            }
+//            }
+        return true;
 
     }
 
     public void broadcast(T msg) {
-        readWriteLock.readLock().lock();
-        try {
 //            for (ConnectionHandler connectionHandler : connectionHandlerConcurrentHashMap.values()) {
 //                connectionHandler.send(msg);
 //            }
-            System.out.println("Size: " + size());
-        } finally {
-            readWriteLock.readLock().unlock();
-        }
+        System.out.println("Size: " + size());
     }
 
     public void disconnect(int connectionId) {
-        readWriteLock.writeLock().lock();
-        try {
-            connectionHandlerConcurrentHashMap.remove(connectionId);
-        } finally {
-            readWriteLock.writeLock().unlock();
-        }
+        connectionHandlerConcurrentHashMap.remove(connectionId);
     }
     public int size(){
-        readWriteLock.readLock().lock();
-            int g = connectionHandlerConcurrentHashMap.size();
-        readWriteLock.readLock().unlock();
-
+        int g = connectionHandlerConcurrentHashMap.size();
         return g;
     }
     public int add(ConnectionHandler connectionHandler) {
-        readWriteLock.writeLock().lock();
-        try {
-            int id = countId.getAndIncrement();
-            connectionHandlerConcurrentHashMap.put(id, connectionHandler);
-            return id;
-        } finally {
-            readWriteLock.writeLock().unlock();
-        }
+        int id = countId.getAndIncrement();
+        connectionHandlerConcurrentHashMap.put(id, connectionHandler);
+        return id;
     }
 }

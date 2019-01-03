@@ -3,6 +3,7 @@ package bgu.spl.net.Assignment3;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -10,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class User {
     private String username;
     private String password;
-    private Boolean isLoggedin;
+    private AtomicBoolean isLoggedin;
     private int ConnId;
     private LinkedList<String> userPosts;
     private LinkedList<String> unreadMessages;
@@ -18,14 +19,13 @@ public class User {
     private ConcurrentLinkedQueue<String> followers; // number of people that follow me
     private AtomicInteger following; // number of people i follow
     private final ReadWriteLock readWriteLockPosts;
-    private final ReadWriteLock readWriteLockFollowers;
 
 
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
-        this.isLoggedin = false;
+        this.isLoggedin = new AtomicBoolean(false);
         this.ConnId = -1;
         this.userPosts = new LinkedList<>();
         this.unreadMessages = new LinkedList<>();
@@ -33,29 +33,18 @@ public class User {
         this.followers = new ConcurrentLinkedQueue<>();
         this.following = new AtomicInteger(0);
         this.readWriteLockPosts = new ReentrantReadWriteLock();
-        this.readWriteLockFollowers = new ReentrantReadWriteLock();
     }
 
-    public ReadWriteLock getReadWriteLockFollowers() {
-        return readWriteLockFollowers;
-    }
-
-    public Boolean getLoggedin() {
+    public AtomicBoolean getLoggedin() {
         return isLoggedin;
     }
 
-    public void setLoggedin(Boolean loggedin) {
-        isLoggedin = loggedin;
-    }
+//    public void setLoggedin(Boolean loggedin) {
+//        isLoggedin = loggedin;
+//    }
 
     public ConcurrentLinkedQueue<String> getFollowers() {
-        readWriteLockFollowers.readLock().lock();
-        try {
-            return followers;
-        }
-        finally {
-            readWriteLockFollowers.readLock().unlock();
-        }
+        return followers;
     }
 
     public String getUsername() {
@@ -95,33 +84,15 @@ public class User {
     }
 
     public void addFollower(String string) {
-        readWriteLockFollowers.writeLock().lock();
-        try {
-            followers.add(string);
-        }
-        finally {
-            readWriteLockFollowers.writeLock().unlock();
-        }
+        followers.add(string);
     }
 
     public void removeFollower(String string) {
-        readWriteLockFollowers.writeLock().lock();
-        try {
-            followers.remove(string);
-        }
-        finally {
-            readWriteLockFollowers.writeLock().unlock();
-        }
+        followers.remove(string);
     }
 
     public int getNumOfFollowers () {
-        readWriteLockFollowers.readLock().lock();
-        try {
-            return followers.size();
-        }
-        finally {
-            readWriteLockFollowers.readLock().unlock();
-        }
+        return followers.size();
     }
 
     public void incrementFollowing() {
@@ -141,13 +112,7 @@ public class User {
     }
 
     public boolean alreadyInFollowers(String username){
-        readWriteLockFollowers.readLock().lock();
-        try {
-            return followers.contains(username);
-        }
-        finally {
-            readWriteLockFollowers.readLock().unlock();
-        }
+        return followers.contains(username);
     }
     public LinkedList<String> getUnreadMessages() {
         return unreadMessages;

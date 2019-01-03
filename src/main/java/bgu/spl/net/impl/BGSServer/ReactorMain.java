@@ -11,8 +11,9 @@ public class ReactorMain {
     public static void main(String[] args) throws IOException {
         Manager manager = new Manager();
         Server.reactor(
-                Integer.parseInt(args[1]), //nthreads
-                Integer.parseInt(args[2]), //port
+                Integer.parseInt(args[0]), //nth
+                // reads
+                Integer.parseInt(args[1]), //port
                 () -> new BidiMessagingProtocolImpl(manager), //protocol factory
                 MessageEncoderDecoderImpl::new //message encoder decoder factory
         ).serve();

@@ -3,7 +3,6 @@ package bgu.spl.net.Assignment3;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -11,7 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class User {
     private String username;
     private String password;
-    private AtomicBoolean isLoggedin;
+    private Boolean isLoggedin;
     private int ConnId;
     private LinkedList<String> userPosts;
     private LinkedList<String> unreadMessages;
@@ -25,7 +24,7 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
-        this.isLoggedin = new AtomicBoolean(false);
+        this.isLoggedin = false;
         this.ConnId = -1;
         this.userPosts = new LinkedList<>();
         this.unreadMessages = new LinkedList<>();
@@ -35,13 +34,13 @@ public class User {
         this.readWriteLockPosts = new ReentrantReadWriteLock();
     }
 
-    public AtomicBoolean getLoggedin() {
+    public Boolean getLoggedin() {
         return isLoggedin;
     }
 
-//    public void setLoggedin(Boolean loggedin) {
-//        isLoggedin = loggedin;
-//    }
+    public void setLoggedin(Boolean loggedin) {
+        isLoggedin = loggedin;
+    }
 
     public ConcurrentLinkedQueue<String> getFollowers() {
         return followers;

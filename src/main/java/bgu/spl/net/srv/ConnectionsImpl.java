@@ -26,14 +26,14 @@ public class ConnectionsImpl<T> implements Connections<T> {
 
         ConnectionHandler connectionHandler = connectionHandlerConcurrentHashMap.get(connectionId);
         // todo check need to check if is null
-//            if (connectionHandler!=null) {
+        if (connectionHandler!=null) {
             // not to send in parallel
             synchronized (connectionHandler) {
-//                    if (connectionHandler!=null) {
+                if (connectionHandler!=null) {
                     connectionHandler.send(msg);
-//                    }
+                }
             }
-//            }
+        }
         return true;
 
     }

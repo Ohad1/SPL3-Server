@@ -92,10 +92,8 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
             }
         }
 
-        if (writeQueue.isEmpty()) {
-            if (protocol.shouldTerminate()) close();
-            else reactor.updateInterestedOps(chan, SelectionKey.OP_READ);
-        }
+        if (protocol.shouldTerminate()) close();
+        else reactor.updateInterestedOps(chan, SelectionKey.OP_READ);
     }
 
     private static ByteBuffer leaseBuffer() {

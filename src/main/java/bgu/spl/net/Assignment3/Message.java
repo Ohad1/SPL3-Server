@@ -12,12 +12,4 @@ public abstract class Message {
         this.content = content;
         this.sentTime = new Date();
     }
-
-    public String getSender() {
-        return sender;
-    }
-
-    public String getContent() {
-        return content;
-    }
 }

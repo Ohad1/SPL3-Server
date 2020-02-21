@@ -32,15 +32,12 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         if (opcodeCount==2) {
             switch (opcode) {
                 case 1:
-                    return decodeNextByteRegisterLogin(nextByte);
                 case 2:
-                    return decodeNextByteRegisterLogin(nextByte);
+                case 6:
+                    return decodeNextByteRegisterLoginAndPm(nextByte);
                 case 4:
                     return decodeNextByteFollow(nextByte);
                 case 5:
-                    return decodeNextBytePostStat(nextByte);
-                case 6:
-                    return decodeNextBytePm(nextByte);
                 case 8:
                     return decodeNextBytePostStat(nextByte);
             }
@@ -65,7 +62,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         return null;
     }
 
-    private String decodeNextByteRegisterLogin(byte nextByte) {
+    private String decodeNextByteRegisterLoginAndPm(byte nextByte) {
         if (len >= bytes.length) {
             bytes = Arrays.copyOf(bytes, len * 2);
         }
@@ -142,30 +139,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         bytes[len++] = nextByte;
         return null;
     }
-    private String decodeNextBytePm(byte nextByte) {
-        if (len >= bytes.length) {
-            bytes = Arrays.copyOf(bytes, len * 2);
-        }
-        if (nextByte == '\0') {
-            numOfZeros++;
-            if (numOfZeros==1) {
-                String username = new String(bytes, 0, len, StandardCharsets.UTF_8);
-                output += " " + username;
-                len = 0;
-            }
-            else if (numOfZeros==2) {
-                String content = new String(bytes, 0, len, StandardCharsets.UTF_8);
-                output += " " + content;
-                String result = output;
-                restart();
-                return result;
-            }
-        }
-        else {
-            bytes[len++] = nextByte;
-        }
-        return null;
-    }
 
 
     public byte[] encode(String message) {
@@ -179,14 +152,11 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
                 switch (split[1]) {
 
                   case "4"://follow
-                  {
+                    case "7": //userlist
+                    {
                       return FollowRegisterUserList(split,type_byte,opcode_request_byte);
                   }
-                  case "7": //userlist
-                  {
-                      return FollowRegisterUserList(split,type_byte,opcode_request_byte);
-                  }
-                  case "8": {
+                    case "8": {
                       return StatRegister(split,type_byte,opcode_request_byte);
                   }
                   default:
@@ -225,8 +195,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
 
         byte[]opcode_char=DefaultConvert(type_byte,pm_post);
         byte[]opcode_char_postuser=DefaultConvert(opcode_char,posting_user);
-        byte[]fin=DefaultConvert(opcode_char_postuser,content);
-        return fin;
+        return DefaultConvert(opcode_char_postuser,content);
     }
 
     private void pushByte(byte nextByte) {
@@ -240,8 +209,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
     private String pop() {
         //notice that we explicitly requesting that the string will be decoded from UTF-8
         //this is not actually required as it is the default encoding in java.
-        String result = new String(bytes, 0, len, StandardCharsets.UTF_8);
-        return result;
+        return new String(bytes, 0, len, StandardCharsets.UTF_8);
     }
 
     public short bytesToShort(byte[] byteArr)
@@ -262,14 +230,6 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         byte[] fin = new byte[type_byte.length + opcode_request_byte.length];
         System.arraycopy(type_byte, 0, fin, 0, type_byte.length);
         System.arraycopy(opcode_request_byte, 0, fin, type_byte.length, opcode_request_byte.length);
-      /*
-        for(int i=0;i<type_byte.length;i++){
-            fin[i]=type_byte[i];
-        }
-        for(int j=0;j<opcode_request_byte.length;j++){
-            fin[type_byte.length+j]=type_byte[j];
-        }
-        */
         return fin;
     }
 
@@ -285,10 +245,8 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         names_list.add(num_users_byte[1]);
 
         String user_name;
-        byte zero = '\0';
-        Byte zeroObject = zero;
+        Byte zeroObject = (byte) '\0';
         byte[] username_byte;
-        int count=0;
         for(int i=3;i<split.length;i++)
         {
             user_name=split[i];
@@ -298,13 +256,10 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
             }
             names_list.add(zeroObject);
         }
-//        byte[]ack_follow= DefaultConvert(type_byte,opcode_request_byte);
-//        byte[]ack_follow_num=DefaultConvert(ack_follow,num_users_byte);
-//        byte[]ack_foolow_num_users=DefaultConvert(ack_follow_num,names_list);
         int size = names_list.size();
         byte[] output = new byte[size];
         for (int i = 0; i < size; i++) {
-            output[i] = names_list.get(i).byteValue();
+            output[i] = names_list.get(i);
         }
         return output;
     }
@@ -320,8 +275,7 @@ public class MessageEncoderDecoderImpl implements MessageEncoderDecoder<String> 
         byte[]ack_stat=DefaultConvert(type_byte,opcode_request_byte);
         byte[]ack_stat_posts=DefaultConvert(ack_stat,num_post_byte);
         byte[]ack_stat_posts_followers=DefaultConvert(ack_stat_posts,num_followers_byte);
-        byte[]fin=DefaultConvert(ack_stat_posts_followers,num_following_byte);
-        return  fin;
+        return DefaultConvert(ack_stat_posts_followers,num_following_byte);
     }
 
 

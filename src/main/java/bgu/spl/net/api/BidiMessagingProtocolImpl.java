@@ -39,7 +39,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 return;
             }
             // prevent login to the same user from two computers
-            Boolean isPut = manager.putIfAbsenct(username, password);
+            Boolean isPut = manager.putIfAbsent(username, password);
             // fail
             if (!isPut) {
                 connections.send(connectionId, "11 1");
@@ -56,12 +56,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             }
             else {
                 User user = manager.getUser(username);
-                synchronized (user.getLoggedin()) {
-                    if (user.getLoggedin() || !user.getPassword().equals(password)) {
+                synchronized (user.getLoggedIn()) {
+                    if (user.getLoggedIn() || !user.getPassword().equals(password)) {
                         connections.send(connectionId, "11 2");
                     } else {
-                        manager.addConidName(connectionId, username);
-                        user.setLoggedin(true);
+                        manager.addConnection(connectionId, username);
+                        user.setLoggedIn(true);
                         user.setConnId(connectionId);
                         connections.send(connectionId, "10 2");
                         for (String mess : user.getUnreadMessages()) {
@@ -77,11 +77,11 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 connections.send(connectionId, "11 3");
             } else {
                 User user = manager.getUser(username);
-                synchronized (user.getLoggedin()) {
-                    if (user.getLoggedin()) { // connect
-                        user.setLoggedin(false);
-                        manager.removeFromConidName(connectionId);
-                        Boolean sent = connections.send(connectionId, "10 3");// ACK LOGOUT
+                synchronized (user.getLoggedIn()) {
+                    if (user.getLoggedIn()) { // connect
+                        user.setLoggedIn(false);
+                        manager.removeConnection(connectionId);
+                        boolean sent = connections.send(connectionId, "10 3");// ACK LOGOUT
                         if (sent) {
                             connections.disconnect(connectionId);
                             shouldTerminate = true;
@@ -93,7 +93,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
         } else if (opNum == 4) { //FOLLOW
             int counter = 0;
             LinkedList<String> names_success = new LinkedList<>();
-            String output;
+            StringBuilder output;
             String username = manager.getUserName(connectionId);
             if (username==null) { //ERROR
                 connections.send(connectionId, "11 4");
@@ -134,12 +134,12 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 if (counter == 0) {
                     connections.send(connectionId, "11 4");
                 } else {
-                    output = "10 4 " + counter;
+                    output = new StringBuilder("10 4 " + counter);
                     for (int i = 0; i < counter; i++) {
-                        output += " " + names_success.removeFirst();
+                        output.append(" ").append(names_success.removeFirst());
                     }
                     int size = output.length();
-                    connections.send(connectionId, output);
+                    connections.send(connectionId, output.toString());
                 }
             }
         } else if (opNum == 5) { //POST
@@ -161,8 +161,7 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                     }
                 }
                 User sendingUser = manager.getUser(username);
-                LinkedList<String> followers = new LinkedList<>();
-                followers.addAll(sendingUser.getFollowers());
+                LinkedList<String> followers = new LinkedList<>(sendingUser.getFollowers());
                 LinkedList<String> all = new LinkedList<>();
                 all.addAll(tagged);
                 all.addAll(followers);
@@ -170,8 +169,8 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
                 for (String receiver : result) {
                     User receiverUser = manager.getUser(receiver);
                     String output = "9 1 " + username + " " + content;
-                    synchronized (receiverUser.getLoggedin()) {
-                        Boolean isSent = connections.send(receiverUser.getConnId(), output);
+                    synchronized (receiverUser.getLoggedIn()) {
+                        boolean isSent = connections.send(receiverUser.getConnId(), output);
                         if (!isSent) {
                             receiverUser.addUnreadMessage(output);
                         }
@@ -186,16 +185,16 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             String user_name = manager.getUserName(connectionId);
             if (user_name != null) {
                 User user = manager.getUser(user_name);
-                if (user.getLoggedin()) {
-                    String content = "";
-                    String output = "";
+                if (user.getLoggedIn()) {
+                    StringBuilder content = new StringBuilder();
+                    String output;
                     for (int i = 2; i < splitted.length; i++) {
-                        content += splitted[i]+ " ";
+                        content.append(splitted[i]).append(" ");
                     }
-                    content = content.substring(0, content.length()-1);
+                    content = new StringBuilder(content.substring(0, content.length() - 1));
                     User user_to_send = manager.getUser(name);
                     if (user_to_send != null) {
-                        if (user_to_send.getLoggedin()) // login
+                        if (user_to_send.getLoggedIn()) // login
                         {
                             int id;
                             id= user_to_send.getConnId();
@@ -235,14 +234,14 @@ public class BidiMessagingProtocolImpl implements BidiMessagingProtocol<String> 
             if (username==null) { //ERROR
                 connections.send(connectionId, "11 7");
             } else {
-                String output = "10 7 ";
+                StringBuilder output = new StringBuilder("10 7 ");
                 List<String> registeredUsers = manager.getRegisteredUsers();
-                output += registeredUsers.size() + " ";
+                output.append(registeredUsers.size()).append(" ");
                 for (String user : registeredUsers) {
-                    output += user + " ";
+                    output.append(user).append(" ");
                 }
-                output = output.substring(0, output.length() - 1);
-                connections.send(connectionId, output);
+                output = new StringBuilder(output.substring(0, output.length() - 1));
+                connections.send(connectionId, output.toString());
             }
         } else if (opNum == 8) {
             String connectedUser = manager.getUserName(connectionId);

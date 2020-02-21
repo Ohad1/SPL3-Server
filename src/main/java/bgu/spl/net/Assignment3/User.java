@@ -33,20 +33,16 @@ public class User {
         this.readWriteLockPosts = new ReentrantReadWriteLock();
     }
 
-    public Boolean getLoggedin() {
+    public Boolean getLoggedIn() {
         return isLoggedIn;
     }
 
-    public void setLoggedin(Boolean loggedin) {
-        isLoggedIn = loggedin;
+    public void setLoggedIn(Boolean loggedIn) {
+        isLoggedIn = loggedIn;
     }
 
     public ConcurrentLinkedQueue<String> getFollowers() {
         return followers;
-    }
-
-    public String getUsername() {
-        return username;
     }
 
     public int getConnId() {
